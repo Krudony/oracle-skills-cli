@@ -44,9 +44,7 @@ cat ψ/inbox/focus*.md 2>/dev/null | head -20
 
 ### 3. Schedule/Appointments
 ```bash
-SCHEDULE="${HOME}/.oracle/ψ/inbox/schedule.md"
-[ ! -f "$SCHEDULE" ] && SCHEDULE="ψ/inbox/schedule.md"
-grep "^|" "$SCHEDULE" 2>/dev/null | grep -v "Date\|---" | head -5
+grep "^|" ~/".oracle/ψ/inbox/schedule.md" 2>/dev/null | grep -v "Date\|---" | head -5
 ```
 
 ### 4. Recent Progress (24h)
