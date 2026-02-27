@@ -34,7 +34,7 @@ describe("recap scripts", () => {
 describe("schedule scripts", () => {
   // Skip calendar.ts on CI - `cal` command not available on Linux runners
   it.skipIf(!!process.env.CI || !!process.env.SKIP_CAL)("calendar.ts", async () => expect(await run(`${S}/schedule/scripts/calendar.ts`)).toMatch(/\d{4}|Su Mo Tu/));
-  it("query.ts", async () => expect(await run(`${S}/schedule/scripts/query.ts`)).toContain("Usage"));
+  it("query.ts", async () => expect(await run(`${S}/schedule/scripts/query.ts`)).toMatch(/Schedule|No events|Cannot connect/));
 });
 
 describe("watch scripts", () => {

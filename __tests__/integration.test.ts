@@ -22,7 +22,7 @@ describe("integration: OpenCode global install", () => {
     }
 
     const skills = await readdir(GLOBAL_OPENCODE_SKILLS);
-    const skillDirs = skills.filter(s => !s.startsWith('.') && s !== 'VERSION.md');
+    const skillDirs = skills.filter(s => !s.startsWith('.') && !s.startsWith('_') && s !== 'VERSION.md');
 
     if (skillDirs.length === 0) {
       console.log("Skipping: No OpenCode skills installed");
@@ -118,7 +118,7 @@ describe("integration: OpenCode global install", () => {
     }
 
     const skills = await readdir(GLOBAL_OPENCODE_SKILLS);
-    const skillDirs = skills.filter(s => !s.startsWith('.') && s !== 'VERSION.md');
+    const skillDirs = skills.filter(s => !s.startsWith('.') && !s.startsWith('_') && s !== 'VERSION.md');
 
     const commands = await readdir(GLOBAL_OPENCODE_COMMANDS);
     const cmdFiles = commands.filter(c => c.endsWith('.md')).map(c => c.replace('.md', ''));

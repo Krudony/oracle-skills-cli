@@ -159,7 +159,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 7 | **physical** | skill + code | Physical location awareness from FindMy |
 | 8 | **project** | skill + code | Clone and track external repos |
 | 9 | **recap** | skill + code | Session orientation and awareness |
-| 10 | **schedule** | skill + code | Query schedule.md using DuckDB markdown |
+| 10 | **schedule** | skill + code | Query schedule via Oracle API (Drizzle DB) |
 | 11 | **speak** | skill + code | Text-to-speech using edge-tts or macOS say |
 | 12 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
@@ -181,7 +181,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 28 | **who-are-you** | skill | Know ourselves |
 | 29 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-02-27 06:07:39 UTC*
+*Generated: 2026-02-27 06:33:30 UTC*
 
 ## Supported Agents
 
