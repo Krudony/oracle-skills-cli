@@ -5,7 +5,7 @@
 import { $ } from "bun";
 import { existsSync } from "fs";
 import { join } from "path";
-import { resolveSchedule } from "../_shared/vault-paths";
+import { homedir } from "os";
 
 // Get repo root
 const root = (await $`git rev-parse --show-toplevel 2>/dev/null`.text()).trim() || process.cwd();
@@ -31,9 +31,10 @@ if (existsSync(focusFile)) {
   if (taskMatch) focusTask = taskMatch[1].trim().slice(0, 80);
 }
 
-// Schedule
+// Schedule (vault-first)
 let schedule = "No schedule";
-const scheduleFile = resolveSchedule(root);
+const vaultSchedule = join(homedir(), ".oracle", "ψ", "inbox", "schedule.md");
+const scheduleFile = existsSync(vaultSchedule) ? vaultSchedule : join(root, "ψ/inbox/schedule.md");
 if (existsSync(scheduleFile)) {
   const scheduleContent = await Bun.file(scheduleFile).text();
   const today = new Date();

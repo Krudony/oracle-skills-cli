@@ -2,10 +2,12 @@
 // calendar.ts - Show month calendar with annotations
 import { $ } from "bun";
 import { existsSync } from "fs";
-import { resolveSchedule } from "../../_shared/vault-paths";
+import { join } from "path";
+import { homedir } from "os";
 
 const ROOT = process.env.ROOT || process.cwd();
-const scheduleFile = resolveSchedule(ROOT);
+const vaultSchedule = join(homedir(), ".oracle", "ψ", "inbox", "schedule.md");
+const scheduleFile = existsSync(vaultSchedule) ? vaultSchedule : join(ROOT, "ψ/inbox/schedule.md");
 
 const now = new Date();
 const todayNum = now.getDate();
