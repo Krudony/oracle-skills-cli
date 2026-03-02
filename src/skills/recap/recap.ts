@@ -18,10 +18,13 @@ try {
 } catch {}
 const lastCommit = (await $`git log --oneline -1`.text()).trim().slice(8, 68);
 
+// Resolve ψ symlink (used for focus + schedule)
+const psi = existsSync("ψ") ? realpathSync("ψ") : "ψ";
+
 // Focus state
 let focusState = "none";
 let focusTask = "No active focus";
-const focusFile = join(root, "ψ/inbox/focus-agent-main.md");
+const focusFile = join(psi, "inbox", "focus-agent-main.md");
 if (existsSync(focusFile)) {
   const focusContent = await Bun.file(focusFile).text();
   const stateMatch = focusContent.match(/^STATE:\s*(.+)/m);
@@ -30,9 +33,8 @@ if (existsSync(focusFile)) {
   if (taskMatch) focusTask = taskMatch[1].trim().slice(0, 80);
 }
 
-// Schedule — resolve ψ symlink
+// Schedule
 let schedule = "No schedule";
-const psi = existsSync("ψ") ? realpathSync("ψ") : "ψ";
 const scheduleFile = join(psi, "inbox", "schedule.md");
 if (existsSync(scheduleFile)) {
   const match = (await Bun.file(scheduleFile).text()).split('\n')

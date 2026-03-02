@@ -15,9 +15,13 @@ const month = now.toISOString().slice(0, 7);
 console.log("# RECAP (Rich)");
 console.log(`\n${time} | ${date}\n\n---\n`);
 
+// Resolve ψ symlink (used for focus + schedule)
+const psiPath = join(ROOT, "ψ");
+const psi = existsSync(psiPath) ? realpathSync(psiPath) : psiPath;
+
 // Focus
 console.log("## FOCUS");
-const focusFile = join(ROOT, "ψ/inbox/focus-agent-main.md");
+const focusFile = join(psi, "inbox", "focus-agent-main.md");
 if (existsSync(focusFile)) {
   const content = await Bun.file(focusFile).text();
   const state = content.match(/^STATE:(.*)$/m)?.[1]?.trim() || "none";
@@ -27,10 +31,8 @@ if (existsSync(focusFile)) {
   console.log("No focus file");
 }
 
-// Schedule — resolve ψ symlink
+// Schedule
 console.log("\n## UPCOMING");
-const psiPath = join(ROOT, "ψ");
-const psi = existsSync(psiPath) ? realpathSync(psiPath) : psiPath;
 const scheduleFile = join(psi, "inbox", "schedule.md");
 if (existsSync(scheduleFile)) {
   const lines = (await Bun.file(scheduleFile).text()).split("\n");
