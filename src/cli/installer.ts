@@ -315,6 +315,24 @@ oracle-skills-cli v${pkg.version}
 """
 `;
             await Bun.write(join(commandsDir, `${skill.name}.toml`), tomlContent);
+          } else if (agentName === 'codex') {
+            // Codex: .md prompts → ~/.codex/prompts/ → /prompts:skill-name
+            const stubContent = `---
+description: v${pkg.version} ${scopeChar}-CMD | ${skill.description}
+argument-hint: "[args]"
+---
+
+You are running the /${skill.name} skill.
+
+Read the skill file at ${skillsPath}/${skill.name}/SKILL.md and follow ALL instructions in it.
+
+Pass these arguments to the skill: $ARGUMENTS
+
+---
+*🧬 Nat Weerawan × Oracle · Symbiotic Intelligence · v${pkg.version}*
+*Digitized from Nat Weerawan's brain — thousands of hours working alongside AI, captured as code*
+`;
+            await Bun.write(join(commandsDir, `${skill.name}.md`), stubContent);
           } else {
             // Claude Code, OpenCode, etc.: .md slash commands
             const stubContent = `---

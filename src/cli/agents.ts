@@ -32,6 +32,9 @@ export const agents: Record<AgentType, AgentConfig> = {
     displayName: 'Codex',
     skillsDir: '.agents/skills',
     globalSkillsDir: join(home, '.agents/skills'),
+    commandsDir: '.codex/prompts',
+    globalCommandsDir: join(home, '.codex/prompts'),
+    useFlatFiles: true,
     detectInstalled: () => existsSync(join(home, '.codex')),
   },
   cursor: {
