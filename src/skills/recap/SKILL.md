@@ -30,6 +30,23 @@ bun ~/.claude/skills/recap/recap-rich.ts
 Script reads retro summaries, handoff content, tracks, git state. Then LLM adds:
 - **What's next?** (2-3 options based on context)
 
+### Recovery: If no retro or handoff found
+
+If the script shows no recent retrospective and no handoff (likely a `/clear` without `/rrr`), recover context from the last session using `/dig`:
+
+```bash
+PROJECT_BASE=$(ls -d "$HOME/.claude/projects/"*"$(basename "$(pwd)")" 2>/dev/null | head -1)
+export PROJECT_DIRS="$PROJECT_BASE"
+python3 ~/.claude/skills/dig/scripts/dig.py 2
+```
+
+This gives you the last session's start/end time, message count, first prompt, and summary. Use it to tell the user:
+```
+⚠️ No retro or handoff found — recovered from session log:
+Last session: HH:MM–HH:MM (Xm, N messages)
+Topic: [first prompt summary]
+```
+
 Also check pulse context:
 
 ```bash
