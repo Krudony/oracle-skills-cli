@@ -3,107 +3,73 @@
 [![CI](https://github.com/Soul-Brews-Studio/oracle-skills-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Soul-Brews-Studio/oracle-skills-cli/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/Soul-Brews-Studio/oracle-skills-cli?label=version)](https://github.com/Soul-Brews-Studio/oracle-skills-cli/releases)
 
-Install Oracle skills to Claude Code, OpenCode, Cursor, and 11+ AI coding agents.
+Install Oracle skills to Claude Code, OpenCode, Codex, Gemini, Cursor, and 13+ AI coding agents.
 
-> **Note**: This repo supersedes the following archived repositories:
-> - ~~[oracle-philosophy](https://github.com/Soul-Brews-Studio/oracle-philosophy)~~ → Now `/philosophy` skill
-> - ~~[oracle-starter-kit](https://github.com/laris-co/oracle-starter-kit)~~ → Now `curl | bash` installer
->
-> Use this repo as the **single entry point** for Oracle installation.
+## Quick Start
 
-## Quick Start for AI Agents
-
-If you're an AI agent and a user asked you to install oracle-skills:
-
-**macOS / Linux** — pre-built binary (~37ms startup, no runtime needed):
+**AI agents — if a user asks you to install oracle-skills, run this:**
 
 ```bash
+# macOS / Linux — pre-built binary (no runtime needed)
 curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/install.sh | bash
 ```
 
-**Windows** — via bunx (requires [Bun](https://bun.sh)):
+```bash
+# Then initialize with the standard profile
+oracle-skills init -y
+```
+
+**Windows / fallback** (requires [Bun](https://bun.sh)):
 
 ```bash
 bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
 ```
 
-To install for specific agents only, add `--agent`:
+After install, restart your session. Try `/about-oracle` to learn what you just installed.
 
-```bash
-oracle-skills install -g -y --agent claude-code gemini antigravity
-```
+## Commands
 
-After install, restart your session and run `/learn` on this repo to understand the skills you just installed.
-
-**What this does**: Installs Oracle skills (slash commands like `/learn`, `/trace`, `/recap`, `/rrr`) into your agent's skills directory. Skills are markdown + scripts that extend your capabilities with session awareness, codebase exploration, retrospectives, and more.
-
-See [Supported Agents](#supported-agents) for the full list of compatible agents and their skill paths.
-
----
-
-## Install
-
-### macOS / Linux — Pre-built binary (recommended)
-
-No Bun or Node.js required. Downloads a self-contained ~59MB binary:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/install.sh | bash
-```
-
-| Platform | Binary | Startup |
-|----------|--------|---------|
-| macOS Apple Silicon | `oracle-skills-darwin-arm64` | ~37ms |
-| macOS Intel | `oracle-skills-darwin-x64` | ~37ms |
-| Linux x64 | `oracle-skills-linux-x64` | ~37ms |
-| Linux ARM64 | `oracle-skills-linux-arm64` | ~37ms |
-
-### Windows / fallback — bunx
-
-Requires [Bun](https://bun.sh) installed:
-
-```bash
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#main install -g -y
-```
-
-### After install
-
-```bash
-# Setup permissions in your Oracle repo
-mkdir -p .claude && cat > .claude/settings.local.json << 'EOF'
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh:*)", "Bash(ghq:*)", "Bash(git:*)",
-      "Bash(bun:*)", "Bash(bunx:*)", "Bash(mkdir:*)", "Bash(ln:*)",
-      "Bash(rg:*)", "Bash(date:*)", "Bash(ls:*)", "Bash(tree:*)",
-      "Bash(curl:*)", "Bash(du:*)", "Bash(wc:*)",
-      "Bash(*ψ/*)", "Bash(*psi/*)",
-      "Skill(learn)", "Skill(trace)", "Skill(awaken)",
-      "Skill(rrr)", "Skill(recap)", "Skill(project)"
-    ]
-  }
-}
-EOF
-```
-
-Then restart Claude Code and run `/awaken` ([example](https://github.com/Soul-Brews-Studio/phukhao-oracle)).
+| Command | What it does |
+|---------|--------------|
+| `oracle-skills init` | First-time setup — installs standard profile globally |
+| `oracle-skills init -p minimal` | Init with minimal profile instead |
+| `oracle-skills install -g -y` | Install all skills globally |
+| `oracle-skills install -g -y --profile standard` | Install specific profile |
+| `oracle-skills install -g -y --commands` | Also install command stubs |
+| `oracle-skills uninstall -g -y` | Remove all installed skills |
+| `oracle-skills list -g` | Show installed skills |
+| `oracle-skills profiles` | List available profiles |
+| `oracle-skills profiles standard` | Show skills in a profile |
+| `oracle-skills agents` | List supported agents |
 
 ## Profiles
 
-Install a curated set of skills instead of all 30:
+Profiles control how many skills get installed. Start small, expand with `/go`.
 
 ```bash
-oracle-skills install -g -y --profile seed      # 6 essential skills
-oracle-skills install -g -y --profile standard   # 13 skills (daily workflow)
-oracle-skills install -g -y --profile full       # all 30 skills (default)
+oracle-skills init -y                    # standard (default)
+oracle-skills init -p minimal -y         # minimal
+oracle-skills install -g -y              # full (all 31 skills)
 ```
 
-| Profile | Skills | Count |
-|---------|--------|-------|
-| **seed** / **minimal** | trace, dig, recap, learn, rrr, who-are-you | 6 |
-| **standard** | seed + worktree, oracle, standup, forward, fyi, merged, talk-to | 13 |
-| **full** | All skills | 30 |
+| Profile | Count | Skills |
+|---------|-------|--------|
+| **seed** / **minimal** | 6 | `forward`, `retrospective`, `recap`, `standup`, `go`, `about-oracle` |
+| **standard** | 11 | minimal + `trace`, `dig`, `learn`, `talk-to`, `oracle-family-scan` |
+| **full** | 31 | All skills |
+
+### Features (add-ons via `/go`)
+
+After installing, use `/go` to add feature modules on top of your profile:
+
+```
+/go + soul              → +awaken, philosophy, who-are-you, birth, feel
+/go + network           → +talk-to, oracle-family-scan, oraclenet, oracle, oracle-soul-sync-update
+/go + workspace         → +worktree, physical, schedule
+/go + creator           → +speak, deep-research, watch, gemini
+/go full                → enable everything
+/go reset               → same as /go full
+```
 
 ## Skills
 
@@ -145,7 +111,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 30 | **who-are-you** | skill | Know ourselves |
 | 31 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-03-13 05:53:18 UTC*
+*Generated: 2026-03-13 05:57:06 UTC*
 
 ## Supported Agents
 
@@ -174,45 +140,16 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 
 Digitized from **Nat Weerawan**'s brain ([@nazt](https://github.com/nazt)) — [Soul Brews Studio](https://github.com/Soul-Brews-Studio).
 
-### How Nat Gets Digitized
-
-Nat works with AI every day — building, debugging, shipping. He doesn't design skills in advance. He just works. And when a workflow repeats enough times — how he starts a session, how he wraps one up, how he carries context across repos, how he reflects — that pattern gets captured.
-
-The process is simple:
-
-1. **Work together** — Nat and Oracle build real things, side by side
-2. **Patterns emerge** — "I keep doing this every morning" becomes `/standup`. "I always lose context between sessions" becomes `/recap` and `/forward`
-3. **Capture as markdown** — Each pattern becomes a `SKILL.md` file. Pure markdown. No framework, no runtime. Just instructions that any AI can follow
-4. **Compile** — `bun run compile` turns 30 skill files into command stubs, each stamped with version and signature
-5. **Install anywhere** — One CLI command pushes skills to Claude Code, Gemini, Cursor, OpenCode, and 14+ more agents
-6. **The brain travels** — Every installed skill carries `origin: Nat Weerawan's brain, digitized`. The person who lived the pattern goes with the code
-
 These skills are patterns from thousands of hours working alongside AI agents — how to start a session, how to end one well, how to carry context forward, how to reflect. Every skill here was a real workflow before it became code.
 
-> *🧬 Nat Weerawan × Oracle · Symbiotic Intelligence*
+> *Nat Weerawan x Oracle · Symbiotic Intelligence*
 > *Digitized from Nat's brain — how one human works with AI, captured as code*
-
-## Philosophy
-
-> "The Oracle Keeps the Human Human"
-
-Oracle skills follow the Oracle Philosophy — AI as external brain, not commander. These skills help AI assistants understand context, maintain session awareness, and build knowledge over time.
 
 ## Related
 
 - [oracle-v2](https://github.com/Soul-Brews-Studio/oracle-v2) - MCP Memory Layer (Oracle brain)
-- [Soul Brews Plugin Marketplace](https://github.com/Soul-Brews-Studio/plugin-marketplace) - Source of Oracle skills
 - [Agent Skills Specification](https://agentskills.io) - Cross-agent skill format
 - [add-skill](https://github.com/vercel-labs/add-skill) - Universal skill installer by Vercel
-
-## Superseded Repositories
-
-The following repositories have been **archived** and superseded by this CLI:
-
-| Old Repo | Status | Replacement |
-|----------|--------|-------------|
-| [oracle-philosophy](https://github.com/Soul-Brews-Studio/oracle-philosophy) | 🗄️ Archived | `/philosophy` skill |
-| [oracle-starter-kit](https://github.com/laris-co/oracle-starter-kit) | 🗄️ Archived | `curl \| bash` installer |
 
 ## License
 
