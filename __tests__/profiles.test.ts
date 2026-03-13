@@ -2,20 +2,20 @@ import { describe, it, expect } from "bun:test";
 import { profiles, features, resolveProfile, resolveProfileWithFeatures } from "../src/profiles";
 
 const ALL_SKILLS = [
-  'forward', 'rrr', 'recap', 'standup',
+  'forward', 'retrospective', 'recap', 'standup', 'go', 'about-oracle',
   'trace', 'dig', 'learn', 'talk-to', 'oracle-family-scan',
-  'awaken', 'philosophy', 'who-are-you', 'about-oracle', 'birth', 'feel',
+  'awaken', 'philosophy', 'who-are-you', 'birth', 'feel',
   'oraclenet', 'oracle-soul-sync-update', 'oracle',
   'worktree', 'physical', 'schedule',
   'speak', 'deep-research', 'watch', 'gemini',
-  'merged', 'fyi', 'where-we-are', 'retrospective', 'project',
+  'merged', 'fyi', 'where-we-are', 'rrr', 'project',
 ];
 
 describe("profiles", () => {
-  it("minimal has 4 ritual skills", () => {
+  it("minimal has 6 skills (4 ritual + go + about-oracle)", () => {
     const result = resolveProfile("minimal", ALL_SKILLS);
-    expect(result).toEqual(['forward', 'rrr', 'recap', 'standup']);
-    expect(result?.length).toBe(4);
+    expect(result).toEqual(['forward', 'retrospective', 'recap', 'standup', 'go', 'about-oracle']);
+    expect(result?.length).toBe(6);
   });
 
   it("seed is alias for minimal", () => {
@@ -24,12 +24,12 @@ describe("profiles", () => {
     expect(seed).toEqual(minimal);
   });
 
-  it("standard has 9 skills (minimal + discovery)", () => {
+  it("standard has 11 skills (minimal + discovery)", () => {
     const result = resolveProfile("standard", ALL_SKILLS);
-    expect(result?.length).toBe(9);
+    expect(result?.length).toBe(11);
     // includes minimal
     expect(result).toContain('forward');
-    expect(result).toContain('rrr');
+    expect(result).toContain('retrospective');
     expect(result).toContain('recap');
     expect(result).toContain('standup');
     // includes discovery
@@ -87,9 +87,10 @@ describe("features", () => {
 });
 
 describe("resolveProfileWithFeatures", () => {
-  it("minimal + soul = 10 skills", () => {
+  it("minimal + soul = 11 skills", () => {
     const result = resolveProfileWithFeatures("minimal", ["soul"], ALL_SKILLS);
-    expect(result.length).toBe(10);
+    // 6 minimal + 5 soul (about-oracle already in minimal, deduped)
+    expect(result.length).toBe(11);
     // has minimal
     expect(result).toContain('forward');
     expect(result).toContain('standup');
@@ -100,16 +101,16 @@ describe("resolveProfileWithFeatures", () => {
 
   it("standard + network deduplicates talk-to and oracle-family-scan", () => {
     const result = resolveProfileWithFeatures("standard", ["network"], ALL_SKILLS);
-    // standard(9) + network(5) - 2 overlap (talk-to, oracle-family-scan) = 12
-    expect(result.length).toBe(12);
+    // standard(11) + network(5) - 2 overlap (talk-to, oracle-family-scan) = 14
+    expect(result.length).toBe(14);
     // no duplicates
     const unique = new Set(result);
     expect(unique.size).toBe(result.length);
   });
 
-  it("minimal + creator = 8 skills", () => {
+  it("minimal + creator = 10 skills", () => {
     const result = resolveProfileWithFeatures("minimal", ["creator"], ALL_SKILLS);
-    expect(result.length).toBe(8);
+    expect(result.length).toBe(10);
     expect(result).toContain('speak');
     expect(result).toContain('gemini');
   });
@@ -121,14 +122,14 @@ describe("resolveProfileWithFeatures", () => {
 
   it("multiple features stack", () => {
     const result = resolveProfileWithFeatures("minimal", ["soul", "creator"], ALL_SKILLS);
-    // 4 + 6 + 4 = 14
-    expect(result.length).toBe(14);
+    // 5 + 6 + 4 = 15
+    expect(result.length).toBe(15);
     expect(result).toContain('awaken');
     expect(result).toContain('speak');
   });
 
   it("empty features = just profile", () => {
     const result = resolveProfileWithFeatures("minimal", [], ALL_SKILLS);
-    expect(result.length).toBe(4);
+    expect(result.length).toBe(6);
   });
 });

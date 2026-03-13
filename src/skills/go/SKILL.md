@@ -14,6 +14,7 @@ description: Switch skill profiles and features. Enable/disable skills instantly
 /go minimal             # switch to minimal (4 skills)
 /go standard            # switch to standard (9 skills)
 /go full                # enable everything (30 skills)
+/go reset               # alias for /go full
 /go + soul              # add soul feature
 /go + creator network   # add multiple features
 /go - workspace         # remove feature
@@ -23,9 +24,32 @@ description: Switch skill profiles and features. Enable/disable skills instantly
 
 ---
 
+## Execution — profile/status commands
+
+For `/go`, `/go <profile>`, `/go reset`, and `/go full` — **run the shell script**:
+
+```bash
+bash ~/.claude/skills/go/scripts/go.sh <profile>
+```
+
+**IMPORTANT**: Always use `bash` explicitly. Do NOT use `zsh` or `sh` — the script relies on bash word splitting.
+
+Examples:
+- `/go` → `bash ~/.claude/skills/go/scripts/go.sh`
+- `/go standard` → `bash ~/.claude/skills/go/scripts/go.sh standard`
+- `/go full` → `bash ~/.claude/skills/go/scripts/go.sh full`
+- `/go reset` → `bash ~/.claude/skills/go/scripts/go.sh reset`
+- `/go standard +soul` → `bash ~/.claude/skills/go/scripts/go.sh standard +soul`
+
+For `/go enable`, `/go disable`, `/go +`, `/go -` — follow the manual instructions below.
+
+---
+
 ## /go (no args) — show current state
 
-Scan `~/.claude/skills/` and show what's enabled/disabled:
+Run: `bash ~/.claude/skills/go/scripts/go.sh`
+
+Or scan manually:
 
 ```bash
 ls ~/.claude/skills/*/SKILL.md ~/.claude/skills/*/SKILL.md.disabled 2>/dev/null
@@ -71,6 +95,7 @@ Profiles are tiers. Switching enables the profile's skills and disables the rest
 | **minimal** | `forward`, `rrr`, `recap`, `standup` |
 | **standard** | minimal + `trace`, `dig`, `learn`, `talk-to`, `oracle-family-scan` |
 | **full** | all 30 skills |
+| **reset** | alias for `full` — enable everything |
 
 ### How it works
 
@@ -168,6 +193,7 @@ Example: `/go disable oraclenet deep-research`
 /go standard + network         → 14 skills (oracle developer)
 /go standard + workspace       → 12 skills (parallel agents)
 /go full                       → 30 skills (everything)
+/go reset                      → same as /go full
 ```
 
 ---

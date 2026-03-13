@@ -1,5 +1,5 @@
 ---
-description: v2.0.10 | Mine Claude Code sessions — timeline, gaps, repo attribution. Use when user says "dig", "sessions", "past sessions", "timeline", "what did I work on".
+description: v3.0.0 | Mine Claude Code sessions — timeline, gaps, repo attribution. Use when user says "dig", "sessions", "past sessions", "timeline", "what did I work on".
 ---
 
 # /dig
@@ -18,5 +18,5 @@ Execute the `dig` skill with the provided arguments.
 **WARNING**: Do NOT use Glob, find, or search for this skill. The path above is the ONLY correct location. Other files with "dig" in the name are NOT this skill.
 
 ---
-*🧬 Nat Weerawan × Oracle · Symbiotic Intelligence · v2.0.10*
+*🧬 Nat Weerawan × Oracle · Symbiotic Intelligence · v3.0.0*
 *Digitized from Nat Weerawan's brain — thousands of hours working alongside AI, captured as code*

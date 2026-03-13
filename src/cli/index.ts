@@ -152,6 +152,58 @@ program
     }
   });
 
+// Init command — first-time setup with default profile
+program
+  .command('init')
+  .description('First-time setup: install standard profile globally')
+  .option('-p, --profile <name>', 'Profile to install (default: standard)', 'standard')
+  .option('-y, --yes', 'Skip confirmation prompts')
+  .action(async (options) => {
+    p.intro(`🔮 Oracle Skills Init v${VERSION}`);
+
+    try {
+      const profileName = options.profile;
+      if (!profiles[profileName]) {
+        p.log.error(`Unknown profile: ${profileName}`);
+        p.log.info(`Available: ${Object.keys(profiles).join(', ')}`);
+        return;
+      }
+
+      // Auto-detect agents
+      const detected = detectInstalledAgents();
+      if (detected.length === 0) {
+        p.log.error('No agents detected. Install Claude Code, Codex, or another supported agent first.');
+        return;
+      }
+
+      p.log.info(`Detected: ${detected.map((a) => agents[a as keyof typeof agents]?.displayName).join(', ')}`);
+      p.log.info(`Profile: ${profileName}`);
+
+      if (!options.yes) {
+        const confirmed = await p.confirm({
+          message: `Install ${profileName} profile globally?`,
+        });
+
+        if (p.isCancel(confirmed) || !confirmed) {
+          p.log.info('Cancelled');
+          return;
+        }
+      }
+
+      await installSkills(detected, {
+        global: true,
+        profile: profileName,
+        yes: true,
+        commands: true,
+      });
+
+      p.outro(`✨ Initialized with ${profileName} profile! Restart your agent to activate.`);
+    } catch (error) {
+      p.log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      process.exit(1);
+    }
+  });
+
 // Uninstall command
 program
   .command('uninstall')
