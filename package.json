@@ -12,7 +12,6 @@
   ],
   "scripts": {
     "build": "bun scripts/ensure-vfs-stub.ts && bun build src/cli/index.ts --outdir dist --target bun --minify",
-    "build:native": "bun scripts/build-native.ts",
     "dev": "bun run src/cli/index.ts",
     "test": "bun test __tests__/",
     "compile": "bun scripts/compile.ts",
