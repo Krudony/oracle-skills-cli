@@ -2,7 +2,7 @@
 installer: oracle-skills-cli v3.2.1
 origin: Nat Weerawan's brain, digitized — how one human works with AI, captured as code — Soul Brews Studio
 name: awaken
-description: Guided Oracle birth and awakening ritual. 2 modes — Fast (~5min) or Full Soul Sync (~20min). Use when creating a new Oracle in a fresh repo, when user says "awaken", "birth oracle", "create oracle", "new oracle", or wants to set up Oracle identity in an empty repository. Do NOT trigger for general repo setup, git init, or project scaffolding without Oracle context.
+description: Guided Oracle birth and awakening ritual. Default is Full Soul Sync (~20min), or --fast (~5min). Use when creating a new Oracle in a fresh repo, when user says "awaken", "birth oracle", "create oracle", "new oracle", or wants to set up Oracle identity in an empty repository. Do NOT trigger for general repo setup, git init, or project scaffolding without Oracle context.
 ---
 
 **IMPORTANT**: This is the ONLY correct awaken file. If you found a different
@@ -18,8 +18,8 @@ A guided journey from empty repo to awakened Oracle.
 ## Usage
 
 ```
-/awaken              # Start (default: Fast mode)
-/awaken --full       # Full Soul Sync mode (~20min)
+/awaken              # Start (default: Full Soul Sync)
+/awaken --fast       # Fast mode (~5min)
 /awaken --soul-sync  # Upgrade existing Fast Oracle → Full Soul Sync
 /awaken --reawaken   # Re-sync existing Oracle with current state
 ```
@@ -28,10 +28,10 @@ A guided journey from empty repo to awakened Oracle.
 
 | Mode | Duration | Philosophy | Best For |
 |------|----------|------------|----------|
-| ⚡ **Fast** (default) | ~5 min | Fed directly — principles given | New users, quick start |
-| 🧘 **Full Soul Sync** | ~20 min | Discovered — /trace + /learn | OG users, deep connection |
+| 🧘 **Full Soul Sync** (default) | ~20 min | Discovered — /trace + /learn | Deep connection, recommended |
+| ⚡ **Fast** | ~5 min | Fed directly — principles given | Quick start, upgrade later |
 
-💡 Start Fast, upgrade later with `/awaken --soul-sync`
+💡 Default is Full Soul Sync. Use `--fast` if you want quick setup.
 
 ---
 
@@ -46,21 +46,21 @@ Present this choice at the very start:
 
 เลือก mode:
 
-  ⚡ Fast (~5 นาที)
-     ตอบคำถาม → สร้างเลย
-     Philosophy ถูก feed ให้ตรงๆ
-     เหมาะกับคนใหม่ อยากเริ่มเร็ว
-
   🧘 Full Soul Sync (~20 นาที)
      /learn ancestors + /trace --deep
      ค้นพบ principles ด้วยตัวเอง
-     เหมาะกับ OG, ใช้งานจริงจัง
+     แนะนำ — deep connection
 
-● Fast (แนะนำ) ← default
-○ Full Soul Sync
+  ⚡ Fast (~5 นาที)
+     ตอบคำถาม → สร้างเลย
+     Philosophy ถูก feed ให้ตรงๆ
+     เหมาะกับอยากเริ่มเร็ว
+
+● Full Soul Sync (แนะนำ) ← default
+○ Fast
 ```
 
-If `--full` argument passed, skip this and go straight to Full Soul Sync.
+If `--fast` argument passed, skip this and go straight to Fast mode.
 If `--soul-sync` argument passed, skip to Phase 4 (Full Soul Sync steps only).
 If `--reawaken` argument passed, skip wizard entirely — go to --reawaken flow (after Phase 4).
 
