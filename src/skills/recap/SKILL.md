@@ -72,21 +72,7 @@ Include in recap:
 
 Need more? `/dig 5` or `/dig --timeline`.
 
-Also check pulse context:
-
-```bash
-cat ψ/data/pulse/project.json 2>/dev/null
-cat ψ/data/pulse/heartbeat.json 2>/dev/null
-```
-
-If pulse data exists, add one line after the script output:
-```
-⚡ Session #X of Y | Streak: N days | Week: ±X% msgs
-```
-
-If pulse files don't exist, skip silently.
-
-**Total**: 1 bash call + optional pulse read + LLM analysis
+**Total**: 1 bash call + LLM analysis
 
 ---
 
