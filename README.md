@@ -8,7 +8,7 @@ Skills for AI coding agents. 31 skills, 18 agents, 4 profiles.
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Soul-Brews-Studio/oracle-skills-cli/main/install.sh | bash
+bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli install -g -y
 ```
 
 Restart your agent. Try `/about-oracle`.
@@ -85,7 +85,7 @@ Oracle skills extend your agent's capabilities with specialized workflows:
 | 30 | **workon** | skill | Work on an issue OR resume a killed worktree |
 | 31 | **worktree** | skill | Git worktree for parallel work |
 
-*Generated: 2026-03-20 11:57:16 UTC*
+*Generated: 2026-03-20 12:04:38 UTC*
 
 ## Supported Agents
 
