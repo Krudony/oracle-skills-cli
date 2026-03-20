@@ -86,6 +86,14 @@ async function updateReadmeTable() {
     `${skillCount} skills for AI coding agents`
   );
 
+  // --- Update version in install commands ---
+  const pkg = JSON.parse(await readFile(join(process.cwd(), 'package.json'), 'utf-8'));
+  const version = pkg.version;
+  readme = readme.replace(
+    /oracle-skills-cli#v[\w.\-]+ install/,
+    `oracle-skills-cli#v${version} install`
+  );
+
   // Check if changed
   const original = await readFile(README_PATH, 'utf-8');
   if (readme === original) {
