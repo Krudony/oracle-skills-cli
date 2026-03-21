@@ -1,5 +1,5 @@
 ---
-description: v3.3.0-alpha.10 | Quickly create a new skill, add to repo, compile, test, and release alpha. Use when user says "alpha feature", "new skill", "add skill", "create skill for", or wants to add a new capability to oracle-skills-cli. Do NOT trigger for /awaken (Oracle birth), /skill-creator (eval/optimize), or general code changes.
+description: v3.3.0-alpha.10 | Create a new skill, compile, test, commit, and install locally. Use when user says "alpha feature", "new skill", "add skill", "create skill for", or wants to add a new capability to oracle-skills-cli. Do NOT trigger for releasing (use /release-alpha), Oracle birth (use /awaken), or skill eval/optimization (use /skill-creator).
 argument-hint: "<skill-name> [description]"
 ---
 

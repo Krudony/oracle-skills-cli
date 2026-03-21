@@ -1,12 +1,12 @@
 ---
 name: alpha-feature
-description: Quickly create a new skill, add to repo, compile, test, and release alpha. Use when user says "alpha feature", "new skill", "add skill", "create skill for", or wants to add a new capability to oracle-skills-cli. Do NOT trigger for /awaken (Oracle birth), /skill-creator (eval/optimize), or general code changes.
+description: Create a new skill, compile, test, commit, and install locally. Use when user says "alpha feature", "new skill", "add skill", "create skill for", or wants to add a new capability to oracle-skills-cli. Do NOT trigger for releasing (use /release-alpha), Oracle birth (use /awaken), or skill eval/optimization (use /skill-creator).
 argument-hint: "<skill-name> [description]"
 ---
 
-# /alpha-feature — Quick Skill Creation + Alpha Release
+# /alpha-feature — Create Skill + Install Locally
 
-One command: create skill → compile → test → commit → alpha release.
+Create skill → compile → test → commit → push → install. No release — use `/release-alpha` when ready.
 
 ## Usage
 
@@ -60,54 +60,39 @@ bun test
 
 If tests fail → fix before continuing.
 
-### 4. Bump Version + Release
-
-```bash
-# Read current version, increment alpha
-CURRENT=$(jq -r '.version' package.json)
-# If X.Y.Z-alpha.N → X.Y.Z-alpha.(N+1)
-npm version <next> --no-git-tag-version
-bun run compile
-```
-
-### 5. Commit + Tag + Release
+### 4. Commit + Push
 
 ```bash
 git add -A
-git commit -m "feat: add /<name> skill — <short description>"
+git commit -m "feat: add /<name> skill — <short description>
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 git push origin main
-git tag v<version>
-git push origin v<version>
-gh release create v<version> --prerelease --title "v<version> — /<name>" --generate-notes
 ```
 
-### 6. Install Locally
+### 5. Install Locally
 
 ```bash
 bun run dev -- install -g -y
 ```
 
-### 7. Output
+### 6. Output
 
 ```markdown
-## ✨ New Skill: /<name>
+## New Skill: /<name>
 
-**Version**: v<version>
-**Release**: https://github.com/.../releases/tag/v<version>
-**Tests**: 110 pass
+**Tests**: pass
+**Installed**: locally (restart session to activate)
 
-Installed locally. Restart session to activate.
-
-Install:
-bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#v<version> install -g -y
+When ready to release: `/release-alpha`
 ```
 
 ## Rules
 
 - Always add anti-triggers based on existing skill conflicts
-- Always run tests before releasing
-- Always use `--prerelease` flag for alpha
+- Always run tests before committing
 - Never create skills that duplicate existing ones — check `/skills` list first
 - Keep SKILL.md lean — under 100 lines for simple skills
+- Do NOT bump version or create tags — that's `/release-alpha`'s job
 
 ARGUMENTS: $ARGUMENTS

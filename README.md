@@ -73,7 +73,7 @@ Switch anytime: `/go minimal`, `/go standard`, `/go full`, `/go + soul`
 | 13 | **speak** | skill + code | Text-to-speech using edge-tts or macOS say |
 | 14 | **watch** | skill + code | Learn from YouTube videos |
 | - |  |  |  |
-| 15 | **alpha-feature** | skill | Quickly create a new skill, add to repo |
+| 15 | **alpha-feature** | skill | Create a new skill, compile, test, commit |
 | 16 | **awaken** | skill | Guided Oracle birth and awakening ritual |
 | 17 | **birth** | skill | Prepare birth props for a new Oracle repo |
 | 18 | **dig** | skill | Mine Claude Code sessions |
