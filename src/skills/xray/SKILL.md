@@ -1,12 +1,24 @@
 ---
-name: memory
-description: Scan and manage Claude Code auto-memory — list, read, stats, clean. Use when user says "memory", "scan memory", "what do you remember", "show memories", "memory stats", "forget", or wants to inspect what the AI remembers across sessions. Do NOT trigger for Oracle vault/ψ (use /trace), session handoffs (use /inbox), or session history (use /dig).
-argument-hint: "[scan | read <name> | stats | types | clean | forget <name>]"
+name: xray
+description: X-ray deep scan — inspect Claude Code auto-memory, installed skills, or session history. Use when user says "xray", "x-ray", "memory", "scan memory", "what do you remember", "show memories", "memory stats", "forget", "list skills", "installed skills", "session history", or wants to inspect what the AI remembers across sessions. Do NOT trigger for Oracle vault/ψ (use /trace) or session handoffs (use /inbox).
+argument-hint: "[memory|skills|sessions]"
 ---
 
-# /memory - Memory Scanner
+# /xray - X-Ray Deep Scan
 
-Inspect and manage Claude Code's auto-memory for the current project.
+Inspect and manage Claude Code auto-memory, installed skills, and session history.
+
+## Subcommands
+
+| Target | Description |
+|--------|-------------|
+| `memory` | (default) Scan and manage Claude Code auto-memory |
+| `skills` | List installed skills with profiles and status |
+| `sessions` | Show session history and retrospectives |
+
+---
+
+## Target: memory (default)
 
 ## Memory Location
 
@@ -18,13 +30,16 @@ MEMORY_DIR="$HOME/.claude/projects/${ENCODED}/memory"
 ## Usage
 
 ```
-/memory                   # Scan — list all memories with types
-/memory scan              # Same as above
-/memory read <name>       # Read a specific memory file
-/memory stats             # Show counts by type, total size, age
-/memory types             # Group memories by type
-/memory clean             # Find stale/outdated memories
-/memory forget <name>     # Remove a memory (after confirmation)
+/xray                     # Default: scan memory — list all memories with types
+/xray memory              # Same as above
+/xray memory scan         # Same as above
+/xray memory read <name>  # Read a specific memory file
+/xray memory stats        # Show counts by type, total size, age
+/xray memory types        # Group memories by type
+/xray memory clean        # Find stale/outdated memories
+/xray memory forget <name># Remove a memory (after confirmation)
+/xray skills              # List installed Oracle skills
+/xray sessions            # Show session history
 ```
 
 ---
@@ -71,7 +86,7 @@ Sort by type, then by age (newest first).
 
 ## Mode 2: Read
 
-### `/memory read <name>`
+### `/xray memory read <name>`
 
 Find file matching `<name>` (partial match OK):
 
@@ -85,7 +100,7 @@ Display full content with frontmatter highlighted.
 
 ## Mode 3: Stats
 
-### `/memory stats`
+### `/xray memory stats`
 
 ```
 🧠 Memory Stats — [project name]
@@ -115,7 +130,7 @@ Display full content with frontmatter highlighted.
 
 ## Mode 4: Types
 
-### `/memory types`
+### `/xray memory types`
 
 Group and display memories by type:
 
@@ -145,7 +160,7 @@ Group and display memories by type:
 
 ## Mode 5: Clean
 
-### `/memory clean`
+### `/xray memory clean`
 
 Find potentially stale memories:
 
@@ -162,7 +177,7 @@ Find potentially stale memories:
 
   ✓  All other memories look current
 
-  Run '/memory forget <name>' to remove a specific memory.
+  Run '/xray memory forget <name>' to remove a specific memory.
   Nothing is deleted without your confirmation.
 ```
 
@@ -172,7 +187,7 @@ Find potentially stale memories:
 
 ## Mode 6: Forget
 
-### `/memory forget <name>`
+### `/xray memory forget <name>`
 
 1. Find the file
 2. Show its content
@@ -187,7 +202,7 @@ Find potentially stale memories:
 
 ## Cross-Project View
 
-If user says `/memory scan --all` or `/memory stats --all`:
+If user says `/xray memory scan --all` or `/xray memory stats --all`:
 
 ```bash
 ls -d "$HOME/.claude/projects"/*/memory/ 2>/dev/null
@@ -207,6 +222,74 @@ Show memory counts per project:
 
   Total: 30 memories across 4 projects
 ```
+
+---
+
+## Target: skills
+
+### `/xray skills`
+
+List all installed Oracle skills with their profiles and status.
+
+```bash
+arra-oracle-skills list -g
+```
+
+Display:
+
+```
+🔬 Installed Skills
+
+  Skill                Profile     Status
+  ──────────────────── ─────────── ──────
+  forward              seed        ✓ installed
+  retrospective        seed        ✓ installed
+  rrr                  seed        ✓ installed
+  awaken               standard    ✓ installed
+  trace                standard    ✓ installed
+  learn                standard    ✓ installed
+
+  Total: N skills installed
+  Profile: [seed|standard|full]
+```
+
+### How to gather
+
+1. Run `arra-oracle-skills list -g` to get installed skills
+2. Cross-reference with profiles from `profiles.ts`
+3. Show which profile each skill belongs to
+
+---
+
+## Target: sessions
+
+### `/xray sessions`
+
+Show recent Claude Code session history and retrospectives.
+
+1. Look for retrospectives in `ψ/memory/retrospectives/`
+2. Look for session logs in `ψ/memory/logs/`
+3. Display recent sessions with dates and summaries:
+
+```
+📜 Session History
+
+  Date         Duration  Summary
+  ──────────── ──────── ────────────────────────────────
+  2026-03-25   45min     Built xray skill, updated profiles
+  2026-03-24   30min     Fixed awaken language picker
+  2026-03-23   1h20min   Refactored profiles system
+
+  Total: N sessions found
+  Source: ψ/memory/retrospectives/
+```
+
+### How to gather
+
+1. Read files in `ψ/memory/retrospectives/` sorted by date (newest first)
+2. Extract date, duration, and summary from each retrospective
+3. If no retrospectives exist, check `ψ/memory/logs/` for session snapshots
+4. Show "No session history found" if both are empty
 
 ---
 
