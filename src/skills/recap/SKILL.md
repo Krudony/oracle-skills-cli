@@ -206,7 +206,7 @@ Everything from `--now`, plus:
 The recap scripts (`recap.ts` and `recap-rich.ts`) auto-detect and display the current session:
 
 ```
-📡 Session: 74c32f34 | oracle-skills-cli | 2h 15m
+📡 Session: 74c32f34 | arra-oracle-skills-cli | 2h 15m
 ```
 
 Detection: scans `~/.claude/projects/[encoded-pwd]/*.jsonl` for the most recent session file, extracts short ID and elapsed time from first timestamp.

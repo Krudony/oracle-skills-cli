@@ -1,4 +1,4 @@
-# arra-oracle-skills
+# arra-arra-oracle-skills
 
 23 skills for AI coding agents. Compatible with 43+ agents via [Vercel Skills CLI](https://github.com/vercel-labs/skills).
 
@@ -6,23 +6,23 @@
 
 ```bash
 # Full CLI (profiles, picker, xray, awaken)
-bunx --bun oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills install -g -y
+bunx --bun arra-oracle-skills@github:Soul-Brews-Studio/arra-arra-oracle-skills install -g -y
 
 # Or via Vercel Skills CLI (any single skill, 43+ agents)
-npx skills add Soul-Brews-Studio/arra-oracle-skills
-npx skills add Soul-Brews-Studio/arra-oracle-skills --skill recap -y
+npx skills add Soul-Brews-Studio/arra-arra-oracle-skills
+npx skills add Soul-Brews-Studio/arra-arra-oracle-skills --skill recap -y
 ```
 
-Audited on [skills.sh](https://skills.sh/Soul-Brews-Studio/arra-oracle-skills). Discoverable via `npx skills find arra-oracle-skills`.
+Audited on [skills.sh](https://skills.sh/Soul-Brews-Studio/arra-arra-oracle-skills). Discoverable via `npx skills find arra-arra-oracle-skills`.
 
 ## Profiles
 
 ```
-oracle-skills init                    # seed (10 skills, default)
-oracle-skills init -p standard        # standard (14 skills)
-oracle-skills install -g -y           # full (all 24 skills)
-oracle-skills select -g               # interactive picker
-oracle-skills uninstall -g -y         # remove all
+arra-oracle-skills init                    # seed (10 skills, default)
+arra-oracle-skills init -p standard        # standard (14 skills)
+arra-oracle-skills install -g -y           # full (all 24 skills)
+arra-oracle-skills select -g               # interactive picker
+arra-oracle-skills uninstall -g -y         # remove all
 ```
 
 ## Switch
@@ -88,18 +88,18 @@ Switch anytime: `/go minimal`, `/go standard`, `/go full`, `/go + soul`
 ## CLI Commands
 
 ```
-oracle-skills install [options]       # install skills to agents
-oracle-skills init [options]          # first-time setup (seed profile)
-oracle-skills uninstall [options]     # remove installed skills
-oracle-skills select [options]        # interactive skill picker
-oracle-skills list [options]          # show installed skills
-oracle-skills profiles [name]         # list skill profiles
-oracle-skills agents                  # list supported agents
-oracle-skills about                   # version, prereqs, status
-oracle-skills awaken                  # TUI awakening mode selector
-oracle-skills inspect [skill]         # inspect a skill (profiles, agents, hooks)
-oracle-skills xray memory [project]   # x-ray Claude Code auto-memory
-oracle-skills shortcut [action]       # create/list/delete command shortcuts
+arra-oracle-skills install [options]       # install skills to agents
+arra-oracle-skills init [options]          # first-time setup (seed profile)
+arra-oracle-skills uninstall [options]     # remove installed skills
+arra-oracle-skills select [options]        # interactive skill picker
+arra-oracle-skills list [options]          # show installed skills
+arra-oracle-skills profiles [name]         # list skill profiles
+arra-oracle-skills agents                  # list supported agents
+arra-oracle-skills about                   # version, prereqs, status
+arra-oracle-skills awaken                  # TUI awakening mode selector
+arra-oracle-skills inspect [skill]         # inspect a skill (profiles, agents, hooks)
+arra-oracle-skills xray memory [project]   # x-ray Claude Code auto-memory
+arra-oracle-skills shortcut [action]       # create/list/delete command shortcuts
 ```
 
 ## Hidden Skills

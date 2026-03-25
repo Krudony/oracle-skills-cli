@@ -10,7 +10,7 @@ interface Shortcut {
 async function getShortcutsPath(): Promise<string> {
   const { join } = await import('path');
   const { homedir } = await import('os');
-  return join(homedir(), '.oracle-skills-shortcuts.json');
+  return join(homedir(), '.arra-oracle-skills-shortcuts.json');
 }
 
 async function loadShortcuts(): Promise<Shortcut[]> {
@@ -42,7 +42,7 @@ export function registerShortcut(program: Command) {
       if (!action || action === 'list' || action === 'ls') {
         if (shortcuts.length === 0) {
           console.log('\n  No shortcuts. Create one:\n');
-          console.log('    oracle-skills shortcut create <name> <command...>\n');
+          console.log('    arra-oracle-skills shortcut create <name> <command...>\n');
           return;
         }
 
@@ -55,7 +55,7 @@ export function registerShortcut(program: Command) {
           const desc = s.description ? `  # ${s.description}` : '';
           console.log(`    ${String(i + 1).padStart(2)}. ${s.name.padEnd(20)} → ${s.command}${desc}`);
         }
-        console.log(`\n  Delete: oracle-skills shortcut delete <number>\n`);
+        console.log(`\n  Delete: arra-oracle-skills shortcut delete <number>\n`);
         return;
       }
 
@@ -76,7 +76,7 @@ export function registerShortcut(program: Command) {
         if (!shortcutCmd) {
           const input = await p.text({
             message: 'Command to run:',
-            placeholder: 'e.g., oracle-skills install -g -y',
+            placeholder: 'e.g., arra-oracle-skills install -g -y',
           });
           if (p.isCancel(input)) return;
           shortcutCmd = input as string;
@@ -175,9 +175,9 @@ export function registerShortcut(program: Command) {
 
       console.log(`\n  Unknown action: ${action}`);
       console.log('  Usage:');
-      console.log('    oracle-skills shortcut                        # list');
-      console.log('    oracle-skills shortcut create <name> <cmd>    # create');
-      console.log('    oracle-skills shortcut delete <number>        # delete');
-      console.log('    oracle-skills shortcut <name>                 # run\n');
+      console.log('    arra-oracle-skills shortcut                        # list');
+      console.log('    arra-oracle-skills shortcut create <name> <cmd>    # create');
+      console.log('    arra-oracle-skills shortcut delete <number>        # delete');
+      console.log('    arra-oracle-skills shortcut <name>                 # run\n');
     });
 }

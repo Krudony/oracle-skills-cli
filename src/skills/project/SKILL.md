@@ -194,8 +194,8 @@ User: "Fix a bug in arra-oracle-v3"
 → Auto-offload, ghq kept for PR feedback
 
 # User wants quick flash contribution (full cleanup)
-User: "Quick README fix on oracle-skills-cli"
-→ /project incubate https://github.com/Soul-Brews-Studio/oracle-skills-cli --flash
+User: "Quick README fix on arra-oracle-skills-cli"
+→ /project incubate https://github.com/Soul-Brews-Studio/arra-oracle-skills-cli --flash
 → Issue #17 created
 → Branch: issue-17-fix-readme
 → [edit, commit, push]

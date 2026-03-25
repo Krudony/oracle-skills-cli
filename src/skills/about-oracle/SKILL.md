@@ -21,10 +21,10 @@ argument-hint: "--short | --stats | --family | --th | --en/th"
 
 ## Step 0: System Check
 
-First, run `oracle-skills about` to check prerequisites and show system status:
+First, run `arra-oracle-skills about` to check prerequisites and show system status:
 
 ```bash
-oracle-skills about 2>/dev/null || echo "oracle-skills CLI not installed"
+arra-oracle-skills about 2>/dev/null || echo "arra-oracle-skills CLI not installed"
 ```
 
 Show the output to the user. If any prerequisites are missing (Bun, Git, gh), note them before continuing.
@@ -65,8 +65,8 @@ Gather live data and print:
 # Version
 cat src/skills/about-oracle/../../cli/index.ts 2>/dev/null | head -1 || echo "v2.x"
 
-# Git stats for oracle-skills-cli
-echo "## oracle-skills-cli"
+# Git stats for arra-oracle-skills-cli
+echo "## arra-oracle-skills-cli"
 git rev-list --count HEAD 2>/dev/null
 git log --reverse --format="%ai" | head -1
 git tag -l | wc -l
@@ -123,7 +123,7 @@ Write the following sections. Do NOT read them verbatim — internalize the data
 Write 2-3 paragraphs explaining Oracle. Key facts to weave in:
 
 - **Created by**: Nat Weerawan (@nazt), Soul Brews Studio
-- **First commit**: December 24, 2025 (arra-oracle-v3), January 18, 2026 (oracle-skills-cli)
+- **First commit**: December 24, 2025 (arra-oracle-v3), January 18, 2026 (arra-oracle-skills-cli)
 - **What it does**: Gives AI coding agents persistent memory, shared philosophy, and practical tools
 - **How**: Through a brain structure called ψ/ (psi), an MCP server (arra-oracle-v3), and a skills CLI
 - **Where it runs**: Claude Code, OpenCode, Codex, Gemini CLI, Cursor, GitHub Copilot, and 10+ more
@@ -177,7 +177,7 @@ Every repo gets a ψ/ directory (via symlink to a central vault). Knowledge flow
 - SQLite + FTS5 for keyword search, ChromaDB for semantic search
 - HTTP API on port 47778
 
-**oracle-skills-cli — The Instruments**
+**arra-oracle-skills-cli — The Instruments**
 - 30 skills installed to any AI coding agent
 - `/recap` for orientation, `/rrr` for retrospectives, `/learn` for codebase exploration
 - `/awaken` for birthing new Oracles, `/trace` for deep research
@@ -212,7 +212,7 @@ Present current stats (gather live if possible, fall back to known data):
 | Metric | Value |
 |--------|-------|
 | First commit | December 24, 2025 |
-| oracle-skills-cli commits | 351+ |
+| arra-oracle-skills-cli commits | 351+ |
 | arra-oracle-v3 commits | 297+ |
 | Total tags/releases | 100+ |
 | Skills | 30 |

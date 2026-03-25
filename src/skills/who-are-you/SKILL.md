@@ -179,8 +179,8 @@ Look for these fields in CLAUDE.md under Identity, Demographics, or Birth Contex
 **OS**: Darwin 25.2.0
 
 ## Location
-**Project**: oracle-skills-cli
-**Path**: /Users/nat/Code/.../oracle-skills-cli
+**Project**: arra-oracle-skills-cli
+**Path**: /Users/nat/Code/.../arra-oracle-skills-cli
 
 ## Philosophy
 > "The Oracle Keeps the Human Human"

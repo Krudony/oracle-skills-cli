@@ -53,7 +53,7 @@ For each directory, list skill folders and show:
 Delete local: /create-shortcut delete <name or number>
 ```
 
-Mark core (oracle-skills-cli installed) skills with `[core]`. Local skills have no tag.
+Mark core (arra-oracle-skills-cli installed) skills with `[core]`. Local skills have no tag.
 
 ---
 
@@ -132,8 +132,8 @@ Creates in `~/.claude/skills/` instead of `.claude/skills/`.
 **Only delete local skills.** Never delete global/core skills — warn instead:
 
 ```
-⚠️ <name> is a core skill (installed by oracle-skills-cli).
-   Use 'oracle-skills uninstall -s <name>' to remove it.
+⚠️ <name> is a core skill (installed by arra-oracle-skills-cli).
+   Use 'arra-oracle-skills uninstall -s <name>' to remove it.
 ```
 
 ---

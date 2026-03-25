@@ -201,7 +201,7 @@ Show memory counts per project:
   Project                          Memories  Size
   ──────────────────────────────── ──────── ──────
   neo-oracle                       14        12.4KB
-  oracle-skills-cli                 8         6.2KB
+  arra-oracle-skills-cli                 8         6.2KB
   maw-js                            5         3.1KB
   office-8bit                       3         2.0KB
 

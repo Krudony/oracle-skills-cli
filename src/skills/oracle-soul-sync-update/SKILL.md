@@ -41,7 +41,7 @@ echo "Current installed: $CURRENT"
 
 ```bash
 # Get latest version from GitHub
-LATEST=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/oracle-skills-cli/tags | grep -m1 '"name"' | cut -d'"' -f4)
+LATEST=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/arra-oracle-skills-cli/tags | grep -m1 '"name"' | cut -d'"' -f4)
 echo "Latest available: $LATEST"
 ```
 
@@ -65,12 +65,12 @@ If versions differ (or `--cleanup` flag), run:
 
 **Normal sync:**
 ```bash
-~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#$LATEST install -g -y
+~/.bun/bin/bunx --bun arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli#$LATEST install -g -y
 ```
 
 **With `--cleanup` (removes old skills first):**
 ```bash
-oracle-skills uninstall -g -y && ~/.bun/bin/bunx --bun oracle-skills@github:Soul-Brews-Studio/oracle-skills-cli#$LATEST install -g -y
+arra-oracle-skills uninstall -g -y && ~/.bun/bin/bunx --bun arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli#$LATEST install -g -y
 ```
 
 Then **restart Claude Code** to load the synced skills.
@@ -81,7 +81,7 @@ Then **restart Claude Code** to load the synced skills.
 
 After restart, run:
 ```bash
-oracle-skills list -g | head -5
+arra-oracle-skills list -g | head -5
 ```
 
 Check that the version matches `$LATEST`.
@@ -92,12 +92,12 @@ Check that the version matches `$LATEST`.
 
 To see recent changes:
 ```bash
-gh release list --repo Soul-Brews-Studio/oracle-skills-cli --limit 5
+gh release list --repo Soul-Brews-Studio/arra-oracle-skills-cli --limit 5
 ```
 
 Or view commits:
 ```bash
-gh api repos/Soul-Brews-Studio/oracle-skills-cli/commits --jq '.[0:5] | .[] | "\(.sha[0:7]) \(.commit.message | split("\n")[0])"'
+gh api repos/Soul-Brews-Studio/arra-oracle-skills-cli/commits --jq '.[0:5] | .[] | "\(.sha[0:7]) \(.commit.message | split("\n")[0])"'
 ```
 
 ---

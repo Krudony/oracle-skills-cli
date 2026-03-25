@@ -8,7 +8,7 @@ import { installSkills, uninstallSkills, discoverSkills } from "../src/cli/insta
 import { profiles } from "../src/profiles";
 import type { AgentConfig } from "../src/cli/types";
 
-const TEST_DIR = join(tmpdir(), `oracle-skills-e2e-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `arra-oracle-skills-e2e-${Date.now()}`);
 const SKILLS_DIR = join(TEST_DIR, "skills");
 const COMMANDS_DIR = join(TEST_DIR, "commands");
 const TEST_AGENT = "test-e2e" as any;
@@ -79,7 +79,7 @@ describe("e2e: install with standard profile", () => {
       expect(existsSync(skillMd)).toBe(true);
 
       const content = await readFile(skillMd, "utf-8");
-      expect(content).toContain("installer: oracle-skills-cli");
+      expect(content).toContain("installer: arra-oracle-skills-cli");
     }
   });
 
@@ -108,7 +108,7 @@ describe("e2e: install with standard profile", () => {
   });
 
   it("manifest has correct structure", async () => {
-    const manifestPath = join(SKILLS_DIR, ".oracle-skills.json");
+    const manifestPath = join(SKILLS_DIR, ".arra-oracle-skills.json");
     expect(existsSync(manifestPath)).toBe(true);
 
     const manifest = JSON.parse(await readFile(manifestPath, "utf-8"));

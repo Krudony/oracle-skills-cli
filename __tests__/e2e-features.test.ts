@@ -8,7 +8,7 @@ import { installSkills, uninstallSkills, discoverSkills } from "../src/cli/insta
 import { profiles, features, resolveProfileWithFeatures } from "../src/profiles";
 import type { AgentConfig } from "../src/cli/types";
 
-const TEST_DIR = join(tmpdir(), `oracle-skills-feat-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `arra-oracle-skills-feat-${Date.now()}`);
 const SKILLS_DIR = join(TEST_DIR, "skills");
 const COMMANDS_DIR = join(TEST_DIR, "commands");
 const TEST_AGENT = "test-feat" as any;

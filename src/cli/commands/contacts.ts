@@ -57,7 +57,7 @@ export function registerContacts(program: Command) {
       if (!action || action === 'list' || action === 'ls') {
         if (names.length === 0) {
           console.log('\n  📇 No contacts yet.\n');
-          console.log('    oracle-skills contacts add <name>\n');
+          console.log('    arra-oracle-skills contacts add <name>\n');
           return;
         }
 

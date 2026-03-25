@@ -91,7 +91,7 @@ describe("installer behavior by agent type", () => {
             // Full skill SHOULD have content
             expect(content).toContain("# /trace");
             // Should have version injected
-            expect(content).toContain("installer: oracle-skills-cli");
+            expect(content).toContain("installer: arra-oracle-skills-cli");
           }
         }
       }

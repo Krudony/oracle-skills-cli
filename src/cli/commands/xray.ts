@@ -247,13 +247,13 @@ async function xrayMemory(project?: string, showAll?: boolean) {
 // ── Register commands ─────────────────────────────────────
 
 export function registerXray(program: Command, version: string) {
-  // oracle-skills inspect [skill]
+  // arra-oracle-skills inspect [skill]
   program
     .command('inspect [skill]')
     .description('Inspect a skill — profiles, agents, hooks, hidden status')
     .action(async (skillName?: string) => inspectSkill(skillName));
 
-  // oracle-skills xray memory [project] | oracle-skills xray memory --all
+  // arra-oracle-skills xray memory [project] | arra-oracle-skills xray memory --all
   program
     .command('xray <target> [project]')
     .description('X-ray deep scan (e.g., xray memory)')
@@ -263,6 +263,6 @@ export function registerXray(program: Command, version: string) {
         return xrayMemory(project, options?.all);
       }
       console.log(`\n  Unknown target: ${target}`);
-      console.log('  Available: oracle-skills xray memory [project] [--all]\n');
+      console.log('  Available: arra-oracle-skills xray memory [project] [--all]\n');
     });
 }

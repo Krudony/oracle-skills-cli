@@ -40,7 +40,7 @@ describe("integration: OpenCode global install", () => {
 
     const content = await readFile(rrrPath, "utf-8");
     expect(content).toContain("G-SKLL");
-    expect(content).toContain("installer: oracle-skills-cli");
+    expect(content).toContain("installer: arra-oracle-skills-cli");
     expect(content).toContain("# /retrospective");
     expect(content).toContain("## /retrospective (Default)");
     expect(content.length).toBeGreaterThan(100);

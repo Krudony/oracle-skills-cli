@@ -47,8 +47,8 @@ export function registerProfiles(program: Command) {
           else if (profile.exclude) type = 'exclude';
           console.log(`  ${profileName.padEnd(15)} ${String(count).padStart(2)} skills  (${type})`);
         }
-        console.log(`\nUsage: oracle-skills profiles <name>   — show skills in profile`);
-        console.log(`       oracle-skills install -g --profile <name> -y\n`);
+        console.log(`\nUsage: arra-oracle-skills profiles <name>   — show skills in profile`);
+        console.log(`       arra-oracle-skills install -g --profile <name> -y\n`);
       }
     });
 }

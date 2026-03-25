@@ -11,7 +11,7 @@ export function registerAbout(program: Command, version: string) {
       const { join } = await import('path');
       const { homedir } = await import('os');
 
-      console.log(`\n  oracle-skills v${version}`);
+      console.log(`\n  arra-oracle-skills v${version}`);
       console.log(`  Digitized from Nat Weerawan's brain — Soul Brews Studio\n`);
 
       // Check prereqs
@@ -66,12 +66,12 @@ export function registerAbout(program: Command, version: string) {
 
       const notDetected = Object.entries(agents).filter(([key]) => !detected.includes(key));
       if (notDetected.length > 0) {
-        console.log(`    (${notDetected.length} more agents supported — run 'oracle-skills agents' to see all)`);
+        console.log(`    (${notDetected.length} more agents supported — run 'arra-oracle-skills agents' to see all)`);
       }
 
       // Installed profile hint
       const home = homedir();
-      const manifestPath = join(home, '.claude/skills/.oracle-skills.json');
+      const manifestPath = join(home, '.claude/skills/.arra-oracle-skills.json');
       if (existsSync(manifestPath)) {
         try {
           const manifest = JSON.parse(await Bun.file(manifestPath).text());
@@ -79,7 +79,7 @@ export function registerAbout(program: Command, version: string) {
           console.log(`  Installed at: ${manifest.installedAt}`);
         } catch {}
       } else {
-        console.log('\n  Not initialized. Run: oracle-skills init');
+        console.log('\n  Not initialized. Run: arra-oracle-skills init');
       }
 
       console.log('');
