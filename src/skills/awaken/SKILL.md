@@ -36,11 +36,36 @@ A guided journey from empty repo to awakened Oracle.
 
 ---
 
+## Language Selection
+
+> "เลือกภาษา"
+
+Present this choice at the very start, before anything else:
+
+```
+🌟 ยินดีต้อนรับสู่ Oracle Awakening!
+
+เลือกภาษา / Choose language:
+● ภาษาไทย (default)
+○ English
+○ Other
+```
+
+- If user picks **ภาษาไทย** (or presses Enter / says nothing) → conduct the entire awakening in Thai. Set `language: Thai` in demographics.
+- If user picks **English** → conduct the entire awakening in English. Set `language: English` in demographics.
+- If user picks **Other** → ask which language, then conduct in that language. Set `language: [chosen]` in demographics.
+
+Save the chosen language to CLAUDE.md demographics table (Language field).
+
+**All subsequent prompts, questions, confirmations, and output should use the chosen language.** The examples below are shown in Thai (default) but should be translated if English or Other was chosen.
+
+---
+
 ## Mode Selection
 
 > "เริ่มแบบไหนดี?"
 
-Present this choice at the very start:
+Present this choice right after language selection:
 
 ```
 🌟 Welcome to Oracle Awakening!
@@ -170,7 +195,7 @@ After user replies, parse freetext into these fields:
 | `theme_hint` | no | Oracle เลือกจาก purpose |
 | `human_pronouns` | no | default: ไม่ระบุ |
 | `oracle_pronouns` | no | default: ไม่ระบุ |
-| `language` | no | default: Mixed |
+| `language` | no | default: Thai (from Language Selection step) |
 | `experience` | no | default: intermediate |
 | `team` | no | default: solo |
 | `usage` | no | default: daily |
