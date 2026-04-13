@@ -33,7 +33,10 @@ Without this flag, TeamCreate/SendMessage/TaskList tools don't exist. Fall back 
 /team-agents "implement feature Y" --plan
 /team-agents --manual "build feature Z"    # spawn agents, user controls
 /team-agents status                    # show running team
-/team-agents shutdown                  # graceful shutdown
+/team-agents --panes                   # peek at tmux panes
+/team-agents shutdown                  # graceful shutdown (SendMessage per agent)
+/team-agents cleanup                   # kill idle orphan panes (safe)
+/team-agents killshot                  # kill ALL non-lead panes (nuclear)
 ```
 
 ---
@@ -349,6 +352,92 @@ Team: whetstone-ops (active)
   builder      in_progress  Fix installer             4
   auditor      idle         —                         5
 ```
+
+---
+
+## /team-agents cleanup
+
+> Sweep the floor after the fight.
+
+Kill **idle** orphan panes left behind after team shutdown. Safe — only kills panes showing the `❯` prompt (idle claude processes). Active panes are skipped.
+
+### Quick Run
+
+```bash
+# Dry run — see what would die
+bash ~/.claude/skills/team-agents/scripts/cleanup.sh --dry-run
+
+# Execute — kill idle panes
+bash ~/.claude/skills/team-agents/scripts/cleanup.sh
+```
+
+### What it does
+
+1. Scans all non-lead panes (pane 1+) in current tmux session
+2. Captures last 3 lines of each pane
+3. If pane shows `❯` prompt → **idle** → kills it
+4. If pane is active (output streaming) → **skips** it
+5. Works backwards (highest pane first) to avoid index shifting
+
+### Output
+
+```
+🧹 Cleanup — skills-cli-view (4 panes)
+
+  Pane 3   78x10      Sonnet 4.6   idle    → killed
+  Pane 2   78x8       Sonnet 4.6   idle    → killed
+  Pane 1   78x8       Opus 4.6     active  → skipped (still active)
+
+  Killed: 2 | Skipped: 1 active
+  Panes remaining: 2
+```
+
+### When to use
+
+- After `/team-agents shutdown` — agent processes exited but tmux panes remain
+- Stale panes from crashed agents
+- Quick cleanup without killing active work
+
+---
+
+## /team-agents killshot
+
+> "Kill them all. Let tmux sort them out."
+
+Kill **ALL** non-lead panes — idle or active. The nuclear option. Use when you want a clean slate.
+
+### Quick Run
+
+```bash
+bash ~/.claude/skills/team-agents/scripts/killshot.sh
+```
+
+### What it does
+
+1. Kills every pane except pane 0 (the lead)
+2. No mercy — active, idle, team, non-team, all die
+3. Shows what was killed
+
+### Output
+
+```
+💀 Killshot — skills-cli-view
+
+  Pane 3   78x10      Opus 4.6     → killed
+  Pane 2   78x8       Sonnet 4.6   → killed
+  Pane 1   78x8       Sonnet 4.6   → killed
+
+  Eliminated: 3 panes
+  Remaining: 1 (lead only)
+```
+
+### When to use
+
+- Total cleanup — don't care what's running
+- Too many orphans to sort through
+- Fresh start needed
+
+**WARNING**: This kills ALL non-lead panes including pre-existing sessions. If you have other work running in side panes, use `cleanup` (safe) instead.
 
 ---
 
