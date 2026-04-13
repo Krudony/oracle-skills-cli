@@ -77,7 +77,8 @@ describe("e2e: install with full profile", () => {
     });
 
     const installed = await listSkillDirs(SKILLS_DIR);
-    const expectedCount = allSkills.length - labOnly.filter(s => allSkills.some(sk => sk.name === s)).length;
+    const secretCount = allSkills.filter(s => s.secret).length;
+    const expectedCount = allSkills.length - labOnly.filter(s => allSkills.some(sk => sk.name === s)).length - secretCount;
     expect(installed.length).toBe(expectedCount);
     for (const name of labOnly) {
       expect(installed).not.toContain(name);
@@ -97,7 +98,8 @@ describe("e2e: install with lab profile", () => {
     });
 
     const installed = await listSkillDirs(SKILLS_DIR);
-    expect(installed.length).toBe(allSkills.length);
+    const secretCount = allSkills.filter(s => s.secret).length;
+    expect(installed.length).toBe(allSkills.length - secretCount);
   });
 });
 
@@ -114,7 +116,8 @@ describe("e2e: profile switch (full → standard)", () => {
 
     const allSkills = await discoverSkills();
     let installed = await listSkillDirs(SKILLS_DIR);
-    const fullCount = allSkills.length - labOnly.filter(s => allSkills.some(sk => sk.name === s)).length;
+    const secretCount = allSkills.filter(s => s.secret).length;
+    const fullCount = allSkills.length - labOnly.filter(s => allSkills.some(sk => sk.name === s)).length - secretCount;
     expect(installed.length).toBe(fullCount);
 
     // Switch to standard

@@ -207,6 +207,53 @@ Check CLAUDE.md for these fields. If not present, use defaults (auto memory, sta
 
 ---
 
+## Anti-Rationalization Guard
+
+> "You didn't come here to make the choice. You've already made it. You're here to try to understand why."
+
+Before writing the final retrospective, scan your own draft for these **excuse patterns**:
+
+### Common Rationalizations
+
+| Excuse | Reality |
+|--------|---------|
+| "This was too complex to finish" | Was it complex, or did you skip the hard part? Show the specific blocker. |
+| "I ran out of context" | Context is a resource. Did you spend it well, or spiral on side quests? |
+| "The API/tool didn't work" | Show the error. Show what you tried. "Didn't work" is not a diagnosis. |
+| "I already tested it manually" | Manual testing doesn't persist. Where's the proof? |
+| "I'll fix it next session" | Is there a concrete plan, or is this a polite way to abandon it? |
+| "It's mostly done" | Define "mostly." What percentage? What's left? Be specific. |
+| "The user changed direction" | Did they change, or did you misunderstand? Check the original request. |
+| "This is a known issue" | Known by whom? Is there an issue filed? A workaround documented? |
+
+### Red Flags in Your Own Retro
+
+Stop and re-examine if your retrospective contains:
+
+- **Vague success claims**: "Made good progress" — on what? Show commits or it didn't happen.
+- **Blame-shifting**: "The build was broken" — did you break it? Did you fix it?
+- **Missing friction**: Zero "What Could Improve" items = you're not being honest.
+- **Inflated metrics**: Counting config changes as "features shipped."
+- **Scope creep excuses**: "I also refactored X" — was that in scope? Did you choose it over the actual task?
+- **Missing evidence**: Claims without git hashes, file paths, or concrete output.
+
+### Verification Checklist
+
+Before saving the retrospective, verify:
+
+```
+[ ] Every "shipped" item has a commit hash or file path
+[ ] Every "blocked" item has a specific error or reason
+[ ] AI Diary contains at least ONE uncomfortable truth
+[ ] Honest Feedback has 3+ friction points (not softball ones)
+[ ] "Next Steps" are specific enough to start immediately
+[ ] No excuse from the table above appears unexamined
+```
+
+**If you catch yourself rationalizing: name it.** Write "I noticed I was rationalizing about X because Y" in the AI Diary. Catching the pattern is more valuable than hiding it.
+
+---
+
 ## Rules
 
 - **NO SUBAGENTS**: Never use Task tool or spawn subagents (only `--deep` may)
@@ -214,3 +261,4 @@ Check CLAUDE.md for these fields. If not present, use defaults (auto memory, sta
 - Honest Feedback: 100+ words, 3 friction points
 - Oracle Sync: REQUIRED after every lesson learned
 - Time Zone: GMT+7 (Bangkok)
+- **Anti-rationalization**: Scan draft against excuse table before saving
