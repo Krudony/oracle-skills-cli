@@ -109,9 +109,19 @@ echo ""
 if [ -n "$TEAM_NAME" ]; then
   OTHER_PANES=$((PANE_COUNT - 1 - TEAM_FOUND))
   echo "  Team: $TEAM_NAME | Agents: $TEAM_FOUND/$((PANE_COUNT-1)) panes | Non-team: $OTHER_PANES"
+
+  # Check if team still exists
+  TEAM_CONFIG="$HOME/.claude/teams/$TEAM_NAME/config.json"
+  if [ ! -f "$TEAM_CONFIG" ] && [ "$TEAM_FOUND" -eq 0 ]; then
+    echo ""
+    echo "  ✅ Team '$TEAM_NAME' has been cleaned up — no agents remain"
+  elif [ ! -f "$TEAM_CONFIG" ] && [ "$TEAM_FOUND" -gt 0 ]; then
+    echo ""
+    echo "  ⚠️ Team deleted but $TEAM_FOUND agent panes still open — they may be orphaned"
+    echo "     Kill orphans: tmux kill-pane -t <pane-id>"
+  fi
   echo ""
-  echo "  💡 Tag panes for reliable mapping:"
-  echo "     tmux set-option -p -t %ID @agent-name \"scout\""
+  echo "  💡 Tag panes: tmux set-option -p -t %ID @agent-name \"name\""
 else
   echo "  💡 Pass team name: bash panes.sh <team-name>"
 fi

@@ -250,22 +250,14 @@ Lead receives all SendMessage reports and compiles into a single output.
 
 Graceful shutdown sequence:
 
+**IMPORTANT**: Structured messages (JSON with `type` field) CANNOT be broadcast via `to: "*"`.
+You MUST send shutdown requests individually to each agent. Attempting `to: "*"` with a structured message will error: `structured messages cannot be broadcast`.
+
 ```
-# 1. Send shutdown request to each teammate
-SendMessage({
-  to: "security",
-  message: { type: "shutdown_request" }
-})
-
-SendMessage({
-  to: "performance",
-  message: { type: "shutdown_request" }
-})
-
-SendMessage({
-  to: "testing",
-  message: { type: "shutdown_request" }
-})
+# 1. Send shutdown request to EACH teammate (no broadcast — #212)
+SendMessage({ to: "security", message: { type: "shutdown_request" } })
+SendMessage({ to: "performance", message: { type: "shutdown_request" } })
+SendMessage({ to: "testing", message: { type: "shutdown_request" } })
 
 # 2. Wait for shutdown_response from each (~5-10s)
 
@@ -274,6 +266,7 @@ TeamDelete()
 ```
 
 **Never skip shutdown** — TeamDelete fails if agents are still active.
+**Never broadcast shutdown** — use sequential sends, one per agent.
 
 ---
 
