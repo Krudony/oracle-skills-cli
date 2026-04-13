@@ -1,5 +1,89 @@
 # Changelog
 
+## v3.9.0-alpha.2 (2026-04-13)
+
+### Team Ops + Mailbox + -s Fix
+
+**New secret skills:**
+- `/mailbox` — Persistent agent memory in ψ/memory/mailbox/. Standing orders, findings, cross-session context. Agents remember across sessions.
+- `/morpheus` — Speculative dreaming. Evolved /dream with prediction tracking, between-session mode, belief cross-referencing.
+
+**Team agent infrastructure (7 scripts, zero tokens):**
+- `team-ops.sh` — Unified CLI: panes, cleanup, killshot, spawn-skills, archive, mailbox, status
+- `panes.sh` v3 — Real `/proc/<pid>/cmdline` extraction. Reads `--agent-name`, `--team-name`, `--model`, `--agent-color` from live processes.
+- `cleanup.sh` — Kill idle orphan panes (safe — only kills `❯` prompt panes)
+- `killshot.sh` — Kill ALL non-lead panes (nuclear)
+- `spawn-skills.sh` — Create ephemeral `/agent` slash commands during team sessions
+- `shutdown-skills.sh` — Archive skills to `/tmp` on shutdown (Nothing is Deleted)
+- `mailbox.sh` — Persistent agent mailbox with standing orders + findings + pre-load for spawn
+
+**Fixes:**
+- `-s` flag is now **additive** (#221) — `arra install -g -s watch` preserves existing skills instead of dropping them
+- Broadcast shutdown warning — explicit that structured messages cannot broadcast (#212)
+- Ghost agent cleanup detection in panes.sh
+
+**Research (from Claude Code source analysis):**
+- Confirmed ghost agent root cause: `PaneBackendExecutor.isActive()` returns `true` always
+- Documented full agent process signature (`--agent-id`, `--team-name`, `--agent-color`, etc.)
+- File-based mailbox architecture (not sockets, not pipes)
+- `acquirePaneCreationLock()` + 200ms delay for sequential pane spawning
+- Blog post: "Ghost Agents: What Happens When Claude Code Team Agents Die"
+
+**Issues closed:** #221, #223
+**Issues filed:** #220, #222, #224, #225
+
+40 skills | 124 tests | standard=15 | full=22 | lab=32 | secret=8
+
+---
+
+## v3.9.0-alpha.1 (2026-04-13)
+
+### 8 new skills + anti-rationalization + dig v2
+
+**New secret skills (6):**
+- `/watch` — YouTube CC extraction via yt-dlp → learn pipeline
+- `/harden` — Oracle governance audit (secrets, golden rules, brain structure, identity)
+- `/wormhole` — Federated query proxy (viewer global, data sovereign)
+- `/fleet` — Deep fleet census across all nodes
+- `/release` — Automated release flow (bump, changelog, tag, push, GH release)
+- `/warp` — SSH+tmux teleport to remote oracle nodes
+
+**New lab skill (1):**
+- `/machines` — Fleet node discovery, ping via maw hey, shortcut creation
+
+**Enhanced skills:**
+- `/rrr` — Anti-rationalization guard: excuse table (8 rationalizations + rebuttals), red flags (6 signals), verification checklist. Applied to all 3 modes (default, DEEP.md, TEAMMATE.md).
+- `/team-agents` — `--manual` mode: spawn named agents, human directs via lead relay, compile on demand
+- `/awaken` — Context-pressure detection (Phase 0): checks session file size, warns at medium/high, suggests /forward
+- `/dig` — v2 deep scan (`--deep` flag: ALL .jsonl files, not just most-recent) + configurable timezone (MAW_DISPLAY_TZ > TZ > system > UTC)
+
+**Issues closed:** #214, #215, #216, #217, #219
+**Documented:** #212 broadcast workaround
+
+38 skills | 124 tests | standard=15 | full=22 | lab=32 | secret=6
+
+---
+
+## v3.8.3 (2026-04-12)
+
+### /go CLI fallback chain
+
+- `/go` CLI detection: global binary → `~/.bun/bin` → `bunx` fallback
+- Prevents `command not found: arra-oracle-skills` on nodes without global install
+
+---
+
+## v3.8.2 (2026-04-12)
+
+### Secret skills + /i-believed + Oracle root detection
+
+- `secret: true` SKILL.md frontmatter — skills excluded from ALL profiles, install only by name (`-s` flag)
+- `/i-believed` — renamed from `/i-believe`, Matrix Oracle soul merged, "We are the One", two tenses (past=proof, present=faith)
+- Oracle root detection — `git rev-parse --show-toplevel` + CLAUDE.md cross-check before writing to ψ/
+- 6 files changed for secret skills: types.ts, skill-source.ts, profiles.ts, installer.ts, list.ts, select.ts
+
+---
+
 ## v3.8.1 (2026-04-11)
 
 ### `/auto-retrospective` friction fixes — truly silent + snooze + less frequent

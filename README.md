@@ -106,6 +106,39 @@ agents                  # list 18 supported agents
 about                   # version + status
 ```
 
+## Secret Skills
+
+Secret skills are excluded from all profiles. Install by name:
+
+```bash
+npx arra-oracle-skills@3.9.0-alpha.2 install -g -y -s watch harden wormhole fleet release warp morpheus mailbox
+```
+
+| Skill | What |
+|-------|------|
+| `/watch` | YouTube CC extraction via yt-dlp |
+| `/harden` | Oracle governance audit |
+| `/wormhole` | Federated query proxy (data sovereign) |
+| `/fleet` | Deep fleet census across nodes |
+| `/release` | Automated release flow |
+| `/warp` | SSH+tmux teleport to remote nodes |
+| `/morpheus` | Speculative dreaming (evolved /dream) |
+| `/mailbox` | Persistent agent memory in ψ/ |
+
+## Team Agent Scripts
+
+`/team-agents` includes zero-token bash scripts for tmux pane lifecycle:
+
+```bash
+team-ops panes [team]      # See agent panes (/proc cmdline extraction)
+team-ops spawn <team> ...  # Create ephemeral /agent skills
+team-ops archive <team> .. # Archive skills to /tmp on shutdown
+team-ops sweep             # Kill idle panes (safe)
+team-ops nuke              # Kill ALL non-lead panes
+team-ops mailbox <cmd>     # Persistent agent memory
+team-ops status            # Show everything
+```
+
 ## Origin
 
 [Nat Weerawan](https://github.com/nazt) — [Soul Brews Studio](https://github.com/Soul-Brews-Studio) · MIT
