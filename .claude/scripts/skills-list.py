@@ -102,21 +102,35 @@ else:
     std_count = sum(1 for s in all_skills if s['profile'] == 'standard')
     full_count = sum(1 for s in all_skills if s['profile'] in ('standard', 'full'))
 
+    full_only = [s for s in all_skills if s['profile'] == 'full']
+    lab_only = [s for s in all_skills if s['profile'] == 'lab']
+    std_only = [s for s in all_skills if s['profile'] == 'standard']
+
     print()
     print(f'📦 Oracle Skills — {len(all_skills)} total')
     print()
-    print(f'  standard  {std_count:3d}  /go standard')
-    print(f'  full      {full_count:3d}  /go full')
-    print(f'  lab       {len(all_skills):3d}  /go lab')
-    print()
-    print(f'  #  Skill                    Profile    Type         Scripts')
-    print(f'  ── ──────────────────────── ────────── ──────────── ───────')
 
-    for i, s in enumerate(all_skills, 1):
-        scripts = '✓' if s['has_scripts'] else ''
+    # Standard
+    print(f'  ── Standard ({len(std_only)}) ── /go standard ──────────────────────')
+    for s in std_only:
+        scripts = ' ✓' if s['has_scripts'] else ''
+        print(f"     /{s['name']:24s} {s['type']:12s}{scripts}")
+
+    # Full
+    print()
+    print(f'  ── Full (+{len(full_only)}) ── /go full ─────────────────────────')
+    for s in full_only:
+        scripts = ' ✓' if s['has_scripts'] else ''
         hidden = ' [hidden]' if s['hidden'] else ''
-        print(f"  {i:2d} {s['name']:24s} {s['profile']:10s} {s['type']:12s} {scripts}{hidden}")
+        print(f"     /{s['name']:24s} {s['type']:12s}{scripts}{hidden}")
+
+    # Lab
+    print()
+    print(f'  ── Lab (+{len(lab_only)}) ── /go lab ──────────────────────────')
+    for s in lab_only:
+        scripts = ' ✓' if s['has_scripts'] else ''
+        print(f"     /{s['name']:24s} {s['type']:12s}{scripts}")
 
     print()
-    print(f'  standard={std_count} | full={full_count} | lab={len(all_skills)}')
+    print(f'  standard={len(std_only)} | full={len(std_only)+len(full_only)} | lab={len(all_skills)}')
     print()
