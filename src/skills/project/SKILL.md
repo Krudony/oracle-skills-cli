@@ -62,23 +62,43 @@ find ψ/learn ψ/incubate -type l 2>/dev/null | grep -i "query"
 
 ### list
 
-Show all tracked projects:
+Show all tracked projects with rich metadata (#227):
 
 ```bash
-echo "📚 Learn"
-find ψ/learn -type l 2>/dev/null | while read link; do
-  target=$(readlink "$link")
-  echo "  ${link#ψ/learn/} → $target"
+echo "📦 Projects"
+echo ""
+
+# Collect all tracked repos (learn + incubate symlinks)
+REPOS=()
+for link in $(find ψ/learn ψ/incubate -name "origin" -type l 2>/dev/null | sort); do
+  dir=$(dirname "$link")
+  owner=$(basename "$(dirname "$dir")")
+  repo=$(basename "$dir")
+  type="learn"
+  echo "$link" | grep -q "incubate" && type="incubate"
+  REPOS+=("$owner/$repo:$type")
 done
 
-echo "🌱 Incubate"
-find ψ/incubate -type l 2>/dev/null | while read link; do
-  target=$(readlink "$link")
-  echo "  ${link#ψ/incubate/} → $target"
-done
+if [ ${#REPOS[@]} -eq 0 ]; then
+  echo "  No tracked projects. Use /learn or /incubate to add."
+else
+  printf "  %-35s %-6s %-8s %-8s %s\n" "Repo" "Stars" "License" "Type" "Description"
+  printf "  %-35s %-6s %-8s %-8s %s\n" "───────────────────────────────────" "──────" "────────" "────────" "──────────────────────"
 
-echo "🏠 External (ghq)"
-ghq list | grep -v "laris-co/Nat-s-Agents" | head -10
+  for entry in "${REPOS[@]}"; do
+    slug="${entry%%:*}"
+    type="${entry##*:}"
+    # Fetch metadata from GitHub (cached per session)
+    meta=$(gh api "repos/$slug" --jq '"\(.stargazers_count)\t\(.license.spdx_id // "none")\t\(.description // "-" | .[0:40])"' 2>/dev/null || echo "?\tnone\t-")
+    stars=$(echo "$meta" | cut -f1)
+    license=$(echo "$meta" | cut -f2)
+    desc=$(echo "$meta" | cut -f3)
+    printf "  %-35s %-6s %-8s %-8s %s\n" "$slug" "⭐$stars" "$license" "$type" "$desc"
+  done
+fi
+
+echo ""
+echo "  Total: ${#REPOS[@]} tracked repos"
 ```
 
 ## Directory Structure

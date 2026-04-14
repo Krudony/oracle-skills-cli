@@ -31,6 +31,19 @@ bun ~/.claude/skills/recap/recap-rich.ts
 Script reads retro summaries, handoff content, tracks, git state. Then LLM adds:
 - **What's next?** (2-3 options based on context)
 
+### Step 1.5: Detect INCUBATED_BY (#229)
+
+The recap-rich.ts script auto-detects `.claude/INCUBATED_BY` breadcrumbs. If present, shows:
+
+```
+## ⚠️ INCUBATED REPO
+oracle: mawui-oracle
+date: 2026-04-13
+source: https://github.com/...
+```
+
+This tells the oracle: "You are in a repo tracked by another oracle. Check the breadcrumb for context."
+
 ### Step 2: Git context
 
 ```bash

@@ -49,6 +49,15 @@ console.log(`\n${time} | ${date}\n\n---\n`);
 const psiPath = join(ROOT, "ψ");
 const psi = existsSync(psiPath) ? realpathSync(psiPath) : psiPath;
 
+// INCUBATED_BY detection (#229)
+const incubatedByPath = join(ROOT, ".claude", "INCUBATED_BY");
+if (existsSync(incubatedByPath)) {
+  const breadcrumb = await Bun.file(incubatedByPath).text();
+  console.log("## ⚠️ INCUBATED REPO");
+  console.log(breadcrumb.trim());
+  console.log("");
+}
+
 // Focus
 console.log("## FOCUS");
 const focusFile = join(psi, "inbox", "focus-agent-main.md");

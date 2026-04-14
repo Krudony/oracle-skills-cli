@@ -135,6 +135,37 @@ sort -u -o "$ROOT/ψ/incubate/.origins" "$ROOT/ψ/incubate/.origins"
 echo "✓ Ready: $ROOT/ψ/incubate/$OWNER/$REPO/origin → source"
 ```
 
+### Step 0.5: Drop INCUBATED_BY Breadcrumb (#226, #228)
+
+After clone/symlink, write `.claude/INCUBATED_BY` in the **target repo** (not the oracle repo):
+
+```bash
+TARGET_REPO="$GHQ_ROOT/github.com/$OWNER/$REPO"
+mkdir -p "$TARGET_REPO/.claude"
+
+# Check if this repo was previously /learn'd
+LEARNED_FROM=""
+if [ -d "$ROOT/ψ/learn/$OWNER/$REPO" ]; then
+  LEARNED_FROM="learned-from: ψ/learn/$OWNER/$REPO/"
+fi
+
+cat > "$TARGET_REPO/.claude/INCUBATED_BY" << BREADCRUMB
+oracle: $(basename "$ROOT")
+oracle-repo: $(git -C "$ROOT" remote get-url origin 2>/dev/null || echo "local")
+date: $(date +%Y-%m-%d)
+mode: ${MODE:-default}
+source: https://github.com/$OWNER/$REPO
+${LEARNED_FROM}
+BREADCRUMB
+
+echo "✓ Breadcrumb dropped: $TARGET_REPO/.claude/INCUBATED_BY"
+```
+
+The breadcrumb enables:
+- **Orphan detection**: Any Claude session can check who tracks this repo
+- **Provenance chain**: `learned-from` links /learn → /incubate (#232)
+- **/recap awareness**: /recap shows a warning when INCUBATED_BY exists (#229)
+
 ### If just a name (no slash, no URL)
 
 Try ghq first, then create with default org:
