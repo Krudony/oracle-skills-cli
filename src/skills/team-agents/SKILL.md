@@ -167,6 +167,7 @@ Instructions:
    })
 
 Rules:
+- CRITICAL: ALWAYS SendMessage your report BEFORE finishing. Never go idle without reporting.
 - ONLY report via SendMessage — do NOT write files
 - Max 500 words in your report
 - Include severity (critical/high/medium/low) for each finding
@@ -192,6 +193,7 @@ Instructions:
    })
 
 Rules:
+- CRITICAL: ALWAYS SendMessage your report BEFORE finishing. Never go idle without reporting.
 - Report via SendMessage ONLY — do NOT write files
 - Max 500 words in report
 - Be specific — paths, lines, evidence
@@ -571,6 +573,7 @@ When you receive a message via SendMessage:
 4. Return to standby — wait for next instruction
 
 Rules:
+- CRITICAL: ALWAYS SendMessage your report BEFORE finishing. Never go idle without reporting.
 - Do NOT start working until instructed
 - Report via SendMessage ONLY — do NOT write files
 - Max 500 words per report
