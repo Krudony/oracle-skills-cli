@@ -17,7 +17,7 @@ export const STANDARD_SKILLS = [
 export const LAB_SKILLS = [
   'bampenpien', 'contacts', 'dream', 'feel', 'fleet', 'harden',
   'i-believed', 'inbox', 'machines', 'mailbox', 'morpheus',
-  'release', 'schedule', 'vault', 'warp', 'watch', 'worktree', 'wormhole',
+  'release', 'schedule', 'vault', 'warp', 'watch', 'work-with', 'worktree', 'wormhole',
 ] as const;
 
 /** Zombie skills — internal development candidates from arra-symbiosis-skills.
