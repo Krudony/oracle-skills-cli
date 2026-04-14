@@ -1,14 +1,14 @@
 ---
 name: team-agents
 description: Spin up coordinated agent teams for any task. Reusable framework for TeamCreate/SendMessage/TaskList patterns. Use when user says "team-agents", "spin up a team", "use teammates", "parallel agents", "coordinate agents", "fan out", or wants multiple agents working together with coordination. Do NOT trigger for simple subagent work (use Agent tool directly) or inter-Oracle messaging (use /talk-to).
-argument-hint: "<task-description> [--roles N] [--model sonnet|opus|haiku] [--plan]"
+argument-hint: "<task-description> [--roles N] [--model sonnet|opus|haiku] [--plan] [--worktree] | who | zoom <agent> | sync | merge <agent> | compile"
 ---
 
 # /team-agents — Coordinated Agent Teams
 
 > "Many hands, one mind."
 
-Spin up a coordinated team of agents for any task. Generalizes the TeamCreate/SendMessage/TaskList pattern into a reusable framework that any skill or workflow can leverage.
+Spin up a coordinated team of agents for any task. Each agent can get its own git worktree for isolation. Human sees everything — panes, branches, heartbeats.
 
 ## Prerequisites
 
@@ -27,14 +27,24 @@ Without this flag, TeamCreate/SendMessage/TaskList tools don't exist. Fall back 
 ## Usage
 
 ```
+# Spawn
 /team-agents "review this PR for security, perf, and tests"
 /team-agents "refactor auth module" --roles 3
 /team-agents "research X" --model haiku
 /team-agents "implement feature Y" --plan
-/team-agents --manual "build feature Z"    # spawn agents, user controls
-/team-agents status                    # show running team
+/team-agents --manual "build feature Z"              # human controls
+/team-agents --manual "build feature" --worktree      # each agent gets git worktree
+
+# Observe
+/team-agents who                       # party-style status with presence dots
 /team-agents --panes                   # peek at tmux panes
-/team-agents shutdown                  # graceful shutdown (SendMessage per agent)
+/team-agents zoom scout                # focus on scout's tmux pane
+
+# Manage
+/team-agents sync                      # git sync all worktrees to main
+/team-agents merge scout               # merge scout's branch to main
+/team-agents compile                   # gather all reports into summary
+/team-agents shutdown                  # graceful shutdown + worktree cleanup
 /team-agents cleanup                   # kill idle orphan panes (safe)
 /team-agents killshot                  # kill ALL non-lead panes (nuclear)
 /team-agents doctor [--fix]            # detect ghosts + orphans + stale tasks
@@ -45,11 +55,11 @@ Without this flag, TeamCreate/SendMessage/TaskList tools don't exist. Fall back 
 | Flag | Effect |
 |------|--------|
 | `--manual` | Human controls agents via lead relay |
+| `--worktree` | Each agent gets its own git worktree + branch |
 | `--panes` | Peek at tmux panes |
 | `--plan` | Show team design, wait for approval |
 | `--roles N` | Override default agent count |
 | `--model X` | Override default model (sonnet/opus/haiku) |
-| `--isolated` | Each agent gets its own git worktree (#224) |
 
 ---
 
@@ -182,6 +192,8 @@ You are the [ROLE] specialist on team "[TEAM_NAME]".
 
 REPO: [ABSOLUTE_PATH_TO_REPO]
 TASK: [TASK_DESCRIPTION]
+WORKTREE: [WORKTREE_PATH if --worktree, else "shared — do NOT write files"]
+BRANCH: [agents/ROLE if --worktree, else "N/A"]
 
 Instructions:
 1. Do your work (read files, run commands, analyze)
@@ -192,10 +204,19 @@ Instructions:
      message: "[findings, max 500 words]"
    })
 
+REPORTING PROTOCOL (mandatory):
+- Every 5 minutes while working: SendMessage PROGRESS: <what you just did>
+- On any blocker: SendMessage STUCK: <what you need from lead or another agent>
+- On completion: SendMessage DONE: <branch if worktree> <summary>
+- On failure: SendMessage ABORT: <reason>
+- NEVER go idle without reporting. Silent agents waste everyone's time.
+- If unsure whether task is done, report PROGRESS, not silence.
+
 Rules:
-- CRITICAL: ALWAYS SendMessage your report BEFORE finishing. Never go idle without reporting.
-- Report via SendMessage ONLY — do NOT write files
-- Max 500 words in report
+- CRITICAL: ALWAYS SendMessage your report BEFORE finishing.
+- If worktree mode: write to YOUR worktree only, commit to YOUR branch
+- If shared repo: do NOT write files — only lead writes
+- Max 500 words per report
 - Be specific — paths, lines, evidence
 - If you need info from another agent, ask lead via SendMessage
 ```
@@ -203,8 +224,9 @@ Rules:
 **Critical**: Always include:
 - `REPO:` with literal absolute path (never shell variables)
 - `team-lead@[TEAM_NAME]` for SendMessage addressing
+- Heartbeat protocol — agents that go silent are the #1 failure mode
+- Worktree path if `--worktree` — prevents agents overwriting each other
 - 500-word limit to prevent context waste
-- "do NOT write files" — only lead writes
 
 ---
 
@@ -305,6 +327,167 @@ bash ~/.claude/skills/team-agents/scripts/killshot.sh    # nuclear — all panes
 
 **Never skip shutdown** — TeamDelete fails if agents are still active.
 **Never broadcast shutdown** — use sequential sends, one per agent.
+
+---
+
+## /team-agents who — Party-Style Status
+
+Show team members with presence dots, task state, and worktree info.
+
+```
+/team-agents who
+```
+
+Display:
+```
+🤝 Team: feature-build (3 agents, --worktree)
+
+  Agent        Status    Task                      Branch            Last Report
+  ──────────── ───────── ───────────────────────── ───────────────── ────────────
+  ● scout      active    Explore codebase          agents/scout      PROGRESS 2m ago
+  ◌ builder    working   Implement login           agents/builder    PROGRESS 4m ago
+  ⊘ tester     stuck     Write tests               agents/tester     STUCK 1m ago
+
+  Heartbeat: 5min | Worktrees: 3 | Duration: 12m
+  
+  ⊘ tester STUCK: "Can't find PartyRules type — is it exported?"
+  💡 tell tester "it's in src/skills/work-with/SKILL.md line 920"
+```
+
+### Presence Dots
+
+| Dot | State | Meaning |
+|-----|-------|---------|
+| ● | active | Last heartbeat < 5 min ago |
+| ◐ | idle | Last heartbeat 5-10 min ago |
+| ◌ | working | In progress, heartbeat received |
+| ⊘ | stuck | Reported STUCK, needs help |
+| ✓ | done | Reported DONE |
+| ✗ | aborted | Reported ABORT |
+| · | silent | No heartbeat > 10 min — investigate |
+
+**Silent (·) is a red flag.** If an agent hasn't reported in 10+ minutes, check their pane or send a status check.
+
+---
+
+## /team-agents zoom <agent> — Focus on Agent
+
+Toggle zoom on an agent's tmux pane.
+
+```
+/team-agents zoom scout
+```
+
+```bash
+SESSION=$(tmux display-message -p '#S' 2>/dev/null)
+# Find pane tagged with @agent-name=scout
+PANE_ID=$(tmux list-panes -t "$SESSION" -F "#{pane_id}" -f "#{==:#{@agent-name},scout}" 2>/dev/null | head -1)
+if [ -n "$PANE_ID" ]; then
+  tmux resize-pane -t "$PANE_ID" -Z  # toggle zoom
+else
+  echo "Agent 'scout' not found in panes"
+fi
+```
+
+Zoom in to watch an agent work. Zoom out to see all panes. Same as workflow kit `maw zoom`.
+
+---
+
+## /team-agents sync — Git Sync Worktrees
+
+Sync all agent worktrees with main branch.
+
+```
+/team-agents sync
+```
+
+For each agent worktree:
+```bash
+REPO_ROOT=$(git rev-parse --show-toplevel)
+for wt in "$REPO_ROOT/agents"/*/; do
+  [ -d "$wt/.git" ] || [ -f "$wt/.git" ] || continue
+  AGENT=$(basename "$wt")
+  echo "Syncing $AGENT..."
+  git -C "$wt" fetch origin main:main 2>/dev/null
+  git -C "$wt" merge main --no-edit 2>/dev/null && echo "  ✓ $AGENT synced" || echo "  ⚠ $AGENT has conflicts"
+done
+```
+
+Display:
+```
+🔄 Sync — 3 worktrees
+
+  Agent     Branch          Status
+  ───────── ─────────────── ──────────
+  scout     agents/scout    ✓ synced
+  builder   agents/builder  ✓ synced
+  tester    agents/tester   ⚠ conflicts (src/types.ts)
+  
+  💡 /team-agents merge scout — merge scout's branch to main
+```
+
+---
+
+## /team-agents merge <agent> — Merge Agent Branch
+
+Merge an agent's completed work into main.
+
+```
+/team-agents merge scout
+```
+
+```bash
+REPO_ROOT=$(git rev-parse --show-toplevel)
+AGENT_BRANCH="agents/$AGENT"
+
+# Check agent is done
+# (ideally TaskList shows completed)
+
+git checkout main
+git merge "$AGENT_BRANCH" --no-ff -m "merge: $AGENT work from team $TEAM_NAME"
+echo "✓ Merged $AGENT_BRANCH into main"
+
+# Optionally clean up worktree
+# git worktree remove "agents/$AGENT"
+# git branch -d "$AGENT_BRANCH"
+```
+
+**Nothing is Deleted**: branches are kept by default. Use `--prune` to remove the worktree after merge.
+
+---
+
+## /team-agents compile — Gather All Reports
+
+Compile all agent reports received via SendMessage into a structured summary.
+
+```
+/team-agents compile
+```
+
+The lead gathers all SendMessage reports received during the session and produces:
+
+```markdown
+# Team Report: [team-name]
+
+**Agents**: [N] | **Duration**: ~[N]min | **Worktrees**: [Y/N]
+
+## scout: [last summary]
+[All PROGRESS/DONE reports from scout]
+
+## builder: [last summary]  
+[All PROGRESS/DONE reports from builder]
+
+## tester: [last summary]
+[All PROGRESS/DONE reports from tester]
+
+## Synthesis
+[Lead's cross-cutting observations]
+
+## Branches Ready to Merge
+- [ ] agents/scout — [summary]
+- [ ] agents/builder — [summary]
+- [ ] agents/tester — [summary]
+```
 
 ---
 
@@ -492,6 +675,40 @@ Manual mode spawns named agents but does NOT auto-orchestrate. The human directs
 | Fast, parallel, fire-and-forget | Deliberate, sequential, human-in-the-loop |
 
 **Use manual when**: you want to name specific agents, control what they investigate, direct them step-by-step, or use team agents as persistent workers you can message throughout the session.
+
+### Worktree Mode (`--worktree`)
+
+When `--worktree` is passed, each agent gets its own git worktree:
+
+```
+repo/                        ← main (lead works here)
+agents/
+  ├── scout/                 ← agent scout (branch: agents/scout)
+  ├── builder/               ← agent builder (branch: agents/builder)
+  └── tester/                ← agent tester (branch: agents/tester)
+```
+
+**Setup worktrees before spawning agents:**
+
+```bash
+REPO_ROOT=$(git rev-parse --show-toplevel)
+for AGENT in $AGENTS; do
+  BRANCH="agents/$AGENT"
+  WORKTREE="$REPO_ROOT/agents/$AGENT"
+  
+  # Create branch from current HEAD
+  git branch "$BRANCH" HEAD 2>/dev/null || true
+  
+  # Create worktree
+  git worktree add "$WORKTREE" "$BRANCH" 2>/dev/null
+  
+  echo "  ✓ $AGENT → $WORKTREE (branch: $BRANCH)"
+done
+```
+
+Each agent's prompt gets `REPO:` set to their worktree path, not the main repo. They can write freely without conflicts.
+
+**On shutdown**, worktrees are preserved (branches survive). Use `/team-agents merge <agent>` to integrate, then optionally `git worktree remove agents/<agent>` to clean up.
 
 ### Step 1: Parse + Show Team
 
@@ -772,15 +989,23 @@ Shutdown is the most common broadcast case. Without it, you must manually send s
 
 ---
 
-## Worktree Isolation (`--isolated`) (#224)
+## Worktree Isolation
 
-When multiple agents edit code simultaneously, last-write-wins. `--isolated` gives each agent its own git worktree:
+Two worktree modes available:
+
+### Mode 1: `--worktree` flag (recommended)
+
+Creates worktrees at `agents/<name>/` with branches `agents/<name>`. The lead manages creation and cleanup. Agents write freely to their own worktree.
 
 ```
-/team-agents --manual --isolated "build feature"
+/team-agents --manual "build feature" --worktree
 ```
 
-Each agent spawns with `isolation: "worktree"` in the Agent tool:
+See "Worktree Mode" section above for setup details.
+
+### Mode 2: `isolation: "worktree"` in Agent tool
+
+Claude Code creates the worktree at `.claude/worktrees/agent-<id>` and cleans up if no changes were made. If changes exist, the worktree path + branch are returned for the lead to merge.
 
 ```
 Agent({
@@ -790,9 +1015,7 @@ Agent({
 })
 ```
 
-Claude Code creates the worktree at `.claude/worktrees/agent-<id>` and cleans up if no changes were made. If changes exist, the worktree path + branch are returned for the lead to merge.
-
-**Note**: Worktree cleanup is NOT automatic if the agent crashes. `team-ops doctor` detects orphaned worktrees and `--fix` removes them.
+**Prefer Mode 1** — it gives you control over where worktrees live and uses predictable branch names. Mode 2 is a fallback when you don't need manual worktree management.
 
 ---
 
