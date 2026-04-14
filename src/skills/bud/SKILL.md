@@ -1,7 +1,7 @@
 ---
 name: bud
 description: 'Create a new oracle via maw bud — yeast-colony reproduction. Use when user says "bud", "new oracle", "create oracle", "spawn oracle", or wants to create a new permanent oracle from the current one.'
-argument-hint: "<name> [--from <parent>] [--birth] [--org <org>] [--note <text>] [--dry-run]"
+argument-hint: "<name> [--from <parent>] [--split] [--birth] [--org <org>] [--note <text>] [--dry-run]"
 ---
 
 # /bud — Create New Oracle
@@ -14,8 +14,9 @@ Facilitate `maw bud` from inside a Claude Code session. The oracle reproduction 
 
 ```
 /bud myoracle                    # Bud from current oracle
+/bud myoracle --split            # Bud + show child in right pane
+/bud myoracle --split --birth    # Bud + split + child runs /birth
 /bud myoracle --from mawjs       # Bud from specific parent
-/bud myoracle --birth            # Bud + chain /birth (Issue #1)
 /bud myoracle --org ARRA-01      # Target different GitHub org
 /bud myoracle --note "why"       # Birth note in ψ/memory/learnings/
 /bud myoracle --dry-run          # Preview only
@@ -69,6 +70,32 @@ This sends `/birth` as the new oracle's first message — creates Issue #1 with 
   Next: run /awaken in the new oracle for full identity setup
   Or:   maw hey $NAME '/awaken'
 ```
+
+### If --split flag (watch the child being born)
+
+After bud completes, split the current tmux pane and show the child:
+
+```bash
+# Check if in tmux
+if [ -n "$TMUX" ]; then
+  # Split pane horizontally — child appears on the right
+  tmux split-window -h -l 50% "cd $(ghq root)/github.com/${ORG}/${NAME}-oracle && claude"
+  echo "✓ Split — child oracle visible on the right pane"
+else
+  echo "⚠️ Not in tmux — --split requires tmux. Child is running in its own window."
+fi
+```
+
+```
+┌──────────────────┬──────────────────┐
+│ parent-oracle    │ ${NAME}-oracle   │
+│ (you are here)   │ (just born)      │
+│                  │ > /awaken        │
+│  Pane 0          │  Pane 1          │
+└──────────────────┴──────────────────┘
+```
+
+The parent watches the child awaken. Same UX as `/team-agents` panes.
 
 ---
 
@@ -175,7 +202,7 @@ git -C "$TARGET" commit -m "feat: birth — budded from ${PARENT}"
 git -C "$TARGET" push -u origin HEAD
 ```
 
-### Step 8: Show result
+### Step 8: Show result + optional split
 
 ```
 🧬 Budded: ${PARENT} → ${NAME} (standalone)
@@ -190,6 +217,15 @@ git -C "$TARGET" push -u origin HEAD
 
   💡 Install maw-js for fleet integration:
      bun add -g maw-js
+```
+
+If `--split` and in tmux:
+
+```bash
+if [ -n "$TMUX" ]; then
+  tmux split-window -h -l 50% "cd $TARGET && claude"
+  echo "✓ Split — child oracle visible on the right pane"
+fi
 ```
 
 ---
