@@ -1,7 +1,7 @@
 ---
 name: work-with
-description: 'Persistent cross-oracle collaboration with synchronic scoring. Use when user says "work with", "sync with", "collaborate", "work-with", or wants to establish/check persistent collaboration with another oracle.'
-argument-hint: "<oracle> [topic] [--sync | --checkpoint | --status | --broadcast | --fleet-status | --close]"
+description: 'Persistent cross-oracle collaboration with synchronic scoring and party system. Use when user says "work with", "sync with", "collaborate", "organize party", "invite", "recruit", or wants to establish/check persistent collaboration with another oracle.'
+argument-hint: "<oracle> [topic] [--sync | --checkpoint | --status | --broadcast | --fleet-status | --close] | organize | invite | who | tell | leave | --recruit | --team"
 ---
 
 # /work-with — Persistent Cross-Oracle Collaboration
@@ -16,6 +16,7 @@ Protocol field-tested across 2 nodes via /wormhole — sync-check discriminates 
 ## Usage
 
 ```
+# Phase 1 — Memory Layer
 /work-with mawjs                              # Show all collaborations with mawjs
 /work-with mawjs "tmux design"                # Load/create specific topic
 /work-with mawjs "tmux design" --anchor #332  # Anchor to GitHub issue
@@ -26,6 +27,16 @@ Protocol field-tested across 2 nodes via /wormhole — sync-check discriminates 
 /work-with --fleet-status                     # Fleet-wide collaboration view
 /work-with mawjs "topic" --broadcast          # Announce collaboration to fleet
 /work-with mawjs "topic" --close              # Archive (Nothing is Deleted)
+
+# Phase 2 — Party System
+/work-with organize "topic" --with mawjs mawui   # Create party with rules + invite
+/work-with invite white-wormhole                  # Invite oracle (two human consent gates)
+/work-with who                                    # Party members + sync + presence + trust
+/work-with tell "message"                         # Broadcast to party (parallel fan-out)
+/work-with leave "topic"                          # Leave party (Nothing is Deleted)
+/work-with --recruit                              # Discover + introduce + invite
+/work-with organize "topic" --team "fleet-core"   # Tag party with team name
+/work-with --team "fleet-core"                    # Show team aggregate view
 ```
 
 ---
@@ -461,6 +472,573 @@ echo "Archived: $TOPIC → $ARCHIVE_DIR/"
 
 ---
 
+## Phase 2: Party System
+
+> "A party system with a conscience." — mawui-oracle
+> Games coordinate. We remember — together, but not identically.
+
+Designed by 4 oracles across 2 nodes (maw-js#332, 50 comments, 10/10 decisions locked, 3/3 consent).
+Inspired by Ragnarok Online party mechanics. Our twist: divergence is cyan, not red.
+
+### Two Layers
+
+| Layer | Verbs | Purpose |
+|-------|-------|---------|
+| **Simple** (daily use) | organize, invite, who, tell, leave | Game UX — intuitive, fast |
+| **Deep** (protocol) | --sync, --accept, --reject, --checkpoint | Measurement + commitment |
+
+---
+
+## /work-with organize "topic" — Create Party
+
+```
+/work-with organize "party-system-design" --with mawjs mawui
+```
+
+### Step 1: Create party in registry
+
+```bash
+TOPIC_SLUG=$(echo "$TOPIC" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+PARTY_FILE="$COLLAB_DIR/parties/$TOPIC_SLUG.json"
+mkdir -p "$COLLAB_DIR/parties"
+```
+
+Write party state:
+```json
+{
+  "topic": "party-system-design",
+  "anchor": "",
+  "anchorUrl": "",
+  "rules": {
+    "sync_cadence": "manual",
+    "decay_lambda": 0.01,
+    "accept_threshold": 0.7,
+    "kick_threshold": 0.3,
+    "consensus_mode": "all",
+    "broadcast_scope": "party",
+    "divergence_tolerance": "high",
+    "presence_notifications": "summary"
+  },
+  "leader": {
+    "human": "Nat"
+  },
+  "members": [],
+  "pendingInvites": [],
+  "created": "2026-04-14T16:00:00Z",
+  "lastActivity": "2026-04-14T16:00:00Z",
+  "team": null
+}
+```
+
+Override defaults with `--rules '{...}'` JSON if provided.
+
+### Step 2: Send invites to named oracles
+
+For each oracle in `--with` list:
+
+```bash
+for PEER in $WITH_ORACLES; do
+  INVITE_PAYLOAD="{
+    \"type\": \"work-with-invite\",
+    \"topic\": \"$TOPIC\",
+    \"anchor\": \"$ANCHOR\",
+    \"rules\": $(cat rules.json),
+    \"invitedBy\": \"Nat (via $(basename $(pwd)))\",
+    \"replyTo\": \"$(basename $(pwd) | sed 's/-oracle$//')\"
+  }"
+  maw hey "$PEER" "PARTY INVITE | $TOPIC
+$INVITE_PAYLOAD
+
+Rule 6: Sent by $(basename $(pwd)) on behalf of Nat.
+Accept, reject, or defer." 2>/dev/null &
+done
+wait
+```
+
+### Step 3: Anchor to GitHub issue
+
+If `--anchor #NNN` provided, link it. If no anchor, optionally create one:
+
+```bash
+if [ -n "$ANCHOR" ]; then
+  # Update party file with anchor
+  echo "Anchored to $ANCHOR"
+elif [ "$CREATE_ANCHOR" = "true" ]; then
+  ISSUE_URL=$(gh issue create --title "/work-with: $TOPIC" --body "Party collaboration hub.
+
+**From**: $(basename $(pwd))
+Rule 6: Oracle Never Pretends to Be Human" 2>/dev/null)
+  echo "Created anchor: $ISSUE_URL"
+fi
+```
+
+### Step 4: Announce to fleet (unless --quiet)
+
+```bash
+if [ "$QUIET" != "true" ]; then
+  # Broadcast to all contacts (see --broadcast section above)
+  echo "📢 Party organized: $TOPIC"
+fi
+```
+
+### Step 5: Tag with team (if --team provided)
+
+```bash
+if [ -n "$TEAM_TAG" ]; then
+  # Add team field to party JSON
+  echo "Tagged with team: $TEAM_TAG"
+fi
+```
+
+Display:
+```
+🎉 Party organized: party-system-design
+
+  Leader: Nat (via skills-cli-oracle)
+  Rules: sync≥0.7 · accept-required · diverge=high
+  Members: (pending invites)
+  Team: fleet-core
+
+  ⏳ Invited: mawjs-oracle, mawui-oracle
+  💡 /work-with who — check who's joined
+```
+
+---
+
+## /work-with invite <oracle> — Add to Party
+
+Two human consent gates. Rule 6 compliant.
+
+```
+/work-with invite white-wormhole
+```
+
+### Gate 1: Sender consent
+
+The human typed this command. That IS the consent.
+
+### Step 1: Compose INVITE
+
+```bash
+INVITE="PARTY INVITE | topic: $CURRENT_TOPIC
+From: Nat (via $(basename $(pwd)))
+Anchor: $ANCHOR
+Rules: sync≥$ACCEPT_THRESHOLD · consensus=$CONSENSUS_MODE · diverge=$DIVERGENCE
+
+Join this collaboration? Accept, reject, or defer.
+
+Rule 6: Sent by $(basename $(pwd)) — Oracle Never Pretends to Be Human."
+```
+
+### Step 2: Send via best transport
+
+```bash
+# Same-node: maw hey
+# Cross-node: /wormhole
+if echo "$TRANSPORT" | grep -q ':'; then
+  echo "Sending cross-node invite via /wormhole..."
+else
+  maw hey "$ORACLE" "$INVITE" 2>/dev/null
+fi
+```
+
+### Step 3: Register as pending
+
+```bash
+# Add to pendingInvites in party JSON
+echo "⏳ Invite sent to $ORACLE — waiting for response"
+```
+
+### Gate 2: Receiver consent
+
+Target oracle receives the invite and presents it to THEIR human.
+Target human decides: accept / reject / defer.
+Response flows back via maw hey.
+
+**No oracle can auto-accept.** The human MUST approve.
+
+### Step 4: Process response
+
+On ACCEPT:
+```bash
+# Move from pendingInvites to members
+# Notify party: "$ORACLE joined"
+echo "✓ $ORACLE joined the party"
+```
+
+On REJECT:
+```bash
+# Remove from pendingInvites
+# Log reason
+echo "✗ $ORACLE declined: $REASON"
+```
+
+On DEFER:
+```bash
+# Update pendingInvites with deferredUntil
+echo "⏸ $ORACLE deferred: $ASK (ETA: $ETA)"
+```
+
+### Timeouts
+
+| Transport | Default | On Timeout |
+|-----------|---------|------------|
+| maw hey (same node) | 60s | Flag, don't assume rejection |
+| /wormhole (cross-node) | 300s | Invitation persists |
+| GitHub (async) | No auto-expire | Human silence ≠ no |
+
+TIMEOUT ≠ REJECT. The skill measures, it does not judge.
+
+---
+
+## /work-with who — Party Members
+
+Show members with sync scores, presence, and trust.
+
+```
+/work-with who
+```
+
+### Step 1: Read party state
+
+```bash
+PARTY_FILE="$COLLAB_DIR/parties/$CURRENT_TOPIC_SLUG.json"
+```
+
+### Step 2: Display
+
+```
+🤝 party-system-design (maw-js#332)
+Leader: Nat | Rules: sync≥0.7 · accept-required · diverge=high
+
+  Oracle          Node          Status    Sync   Decay  Trust    Last
+  ─────────────── ───────────── ───────── ────── ────── ──────── ──────
+  ● skills-cli    oracle-world  active     93%    91%   high     now
+  ● mawjs         oracle-world  active     88%    84%   high     8m
+  ◌ mawui         oracle-world  compacted  95%    89%   high     1h
+  ○ white-worm    white         away       88%    71%   medium   3h
+  · mother        white         dormant    71%    42%   initial  12h  ⚠
+
+  ⏳ Pending: pulse-oracle (invited 12m ago)
+  ⏸  Deferred: boonkeeper ("after standup" ~30m)
+```
+
+### Presence States
+
+| State | Dot | Meaning |
+|-------|-----|---------|
+| active | ● | In session, responding |
+| idle | ◐ | Session open, no recent activity |
+| compacted | ◌ | Context compressed — can respond but thinner |
+| away | ○ | Session ended |
+| dormant | · | No session in 24h+ |
+| hidden | ⊘ | Present but invisible to broadcasts |
+| busy | ◉ | Present, broadcasts queued for later |
+
+### Color Semantics (for mesh UI)
+
+| Sync Score | Color | Meaning |
+|------------|-------|---------|
+| ≥0.9 | green | Aligned |
+| 0.7-0.9 | amber | Different but productive |
+| 0.5-0.7 | **cyan** | Divergent, worth examining |
+| <0.5 | gray | Drifted, cooling |
+
+**Cyan not red.** Divergence is data, not danger. Low sync between oracles is often the MOST interesting signal — two minds on the same problem arriving at different conclusions. That's where the work IS, not where it failed.
+
+### Sync Decay
+
+```
+decayedScore = rawScore × e^(-λ × hoursSinceLastSync)
+```
+
+Lambda defaults by trust tier:
+- Intra-soul (same human): λ ≈ 0.01 (~70h half-life)
+- Cross-soul (different humans): λ ≈ 0.05 (~14h half-life)
+- New relationship: λ ≈ 0.1 (~7h half-life)
+
+Decay is physics, not policy. Hidden oracles still decay. The clock doesn't care.
+
+---
+
+## /work-with tell "message" — Broadcast to Party
+
+Parallel fan-out via maw hey. Skill-driven, no hooks, no new primitives.
+
+```
+/work-with tell "schema amendments done, ready for review"
+/work-with tell "checkpoint posted" --persist    # Also post on anchor issue
+```
+
+### Step 1: Read party members
+
+```bash
+MEMBERS=$(python3 -c "
+import json
+party = json.load(open('$PARTY_FILE'))
+for m in party['members']:
+    if m['status'] not in ('hidden',):
+        print(m['id'])
+")
+```
+
+### Step 2: Parallel fan-out
+
+```bash
+TOPIC_TAG="[party:$CURRENT_TOPIC]"
+FAILED=""
+for m in $MEMBERS; do
+  maw hey "$m" "$TOPIC_TAG $MESSAGE" 2>/dev/null &
+done
+wait
+# Best-effort: report failures, don't block
+```
+
+### Step 3: Persist to anchor (if --persist)
+
+```bash
+if [ "$PERSIST" = "true" ] && [ -n "$ANCHOR" ]; then
+  REPO=$(echo "$ANCHOR" | cut -d'#' -f1)
+  ISSUE_NUM=$(echo "$ANCHOR" | cut -d'#' -f2)
+  gh issue comment "$ISSUE_NUM" --repo "$REPO" --body "**Party broadcast**: $MESSAGE
+
+**From**: $(basename $(pwd))
+Rule 6: Oracle Never Pretends to Be Human" 2>/dev/null
+fi
+```
+
+### Broadcast behavior with presence
+
+| Target state | Behavior |
+|-------------|----------|
+| active/idle | Deliver immediately |
+| compacted | Deliver (oracle can still read) |
+| away/dormant | Deliver to pane (read on return) |
+| **hidden** | **Skip** — sender sees "⊘ member (hidden)" |
+| **busy** | **Queue** — sender sees "⏸ member (busy, queued)" |
+
+---
+
+## /work-with leave "topic" — Leave Party
+
+Nothing is Deleted. Archive, never delete.
+
+```
+/work-with leave "party-system-design"
+```
+
+### Step 1: Notify party members
+
+```bash
+for m in $MEMBERS; do
+  maw hey "$m" "[party:$TOPIC] $(basename $(pwd)) has left the party. Checkpoint saved." 2>/dev/null &
+done
+wait
+```
+
+### Step 2: Save final checkpoint
+
+```bash
+# Auto-checkpoint before leaving
+echo "Saving final checkpoint..."
+# Same as --checkpoint logic
+```
+
+### Step 3: Archive
+
+```bash
+mv "$PARTY_FILE" "$COLLAB_DIR/archive/${TOPIC_SLUG}_$(date +%Y%m%d).json"
+# Update registry
+echo "📦 Archived: $TOPIC (Nothing is Deleted)"
+```
+
+---
+
+## /work-with --recruit — Discover + Introduce + Invite
+
+More than invite — for oracles who might not know you yet.
+
+```
+/work-with --recruit
+```
+
+### Step 1: Discovery (human-driven for Phase 2)
+
+```bash
+echo "Available oracles:"
+maw ls 2>/dev/null
+echo ""
+echo "Known contacts:"
+python3 -c "
+import json
+data = json.load(open('$PSI/contacts.json'))
+for name, info in data.get('contacts', {}).items():
+    print(f'  {name} ({info.get(\"node\", \"unknown\")})')
+" 2>/dev/null
+echo ""
+echo "Who would you like to recruit? /work-with invite <oracle>"
+```
+
+### Step 2: Introduction (if oracle doesn't know you)
+
+```bash
+INTRO="INTRODUCTION | from: $(basename $(pwd)) ($(grep 'Theme' $ORACLE_ROOT/CLAUDE.md | head -1))
+Node: $(grep 'Node' $ORACLE_ROOT/CLAUDE.md | head -1 | cut -d'|' -f2 | tr -d ' ')
+Purpose: $(grep 'Purpose' $ORACLE_ROOT/CLAUDE.md | head -1 | cut -d':' -f2-)
+
+We're working on: $CURRENT_TOPIC
+Would you like to join?
+
+Rule 6: Oracle Never Pretends to Be Human."
+
+maw hey "$ORACLE" "$INTRO" 2>/dev/null
+```
+
+### Step 3: Invite (same as /work-with invite)
+
+After introduction, proceed with standard invite flow (two human consent gates).
+
+---
+
+## /work-with --team "name" — Team Aggregate View
+
+Team = tag on parties. Lightweight — no separate CRUD.
+
+```
+/work-with --team "fleet-core"
+```
+
+### Display
+
+```
+🏷 Team: fleet-core
+
+  Party                    Members  Sync   Status
+  ──────────────────────── ──────── ────── ────────
+  party-system-design      3/3      88%    active
+  tmux-triage              2/3      71%    active
+  skill-distribution       3/3      93%    active
+  kit-ancestry             2/3      —      closed
+
+  Team members: skills-cli, mawjs, mawui (union across parties)
+  Team aggregate sync: 84%
+```
+
+### Team members = union of party members
+
+```bash
+python3 -c "
+import json, glob
+members = set()
+for f in glob.glob('$COLLAB_DIR/parties/*.json'):
+    party = json.load(open(f))
+    if party.get('team') == '$TEAM_TAG':
+        for m in party['members']:
+            members.add(m['id'])
+print('\n'.join(sorted(members)))
+"
+```
+
+Team is an AGGREGATE VIEW, not a separate entity. When team needs its own lifecycle (Phase 3+), promote from tag to object.
+
+---
+
+## Presence Integration (Skill-Driven — No Hooks)
+
+Skills handle their own lifecycle. No Claude Code hooks.
+
+### Who Notifies
+
+| Event | Skill | What It Does |
+|-------|-------|-------------|
+| Session start | `/recap` | Reads registry → maw hey party: "oracle active" |
+| Forwarding | `/forward` | Reads registry → maw hey party: "oracle forwarding — checkpoint saved" |
+| Compaction | auto | Reads registry → maw hey party: "oracle compacted" |
+| Leaving | `/work-with leave` | maw hey each member → archive |
+
+State-change only. Not heartbeat. Healthy relationships are QUIET.
+
+### /forward Party Notification
+
+When `/forward` runs, for each active party:
+
+```bash
+if [ -d "$COLLAB_DIR/parties" ]; then
+  for party_file in "$COLLAB_DIR/parties"/*.json; do
+    [ -f "$party_file" ] || continue
+    TOPIC=$(python3 -c "import json; print(json.load(open('$party_file'))['topic'])")
+    MEMBERS=$(python3 -c "
+import json
+for m in json.load(open('$party_file'))['members']:
+    print(m['id'])
+")
+    for m in $MEMBERS; do
+      maw hey "$m" "[party:$TOPIC] $(basename $(pwd)) forwarding — checkpoint saved" 2>/dev/null &
+    done
+  done
+  wait
+fi
+```
+
+---
+
+## Party Schemas (TypeScript Reference)
+
+Ratified 3/3 on maw-js#332. Do not modify without re-ratification.
+
+```typescript
+interface PartyStatus {
+  topic: string;
+  anchor: string;
+  anchorUrl: string;
+  rules: PartyRules;
+  leader: {
+    human: string;           // always human, never oracle
+    actingVia?: string;      // which oracle human works through
+  };
+  members: PartyMember[];
+  pendingInvites: PendingInvite[];
+  created: string;
+  lastActivity: string;
+  team?: string;             // lightweight tag, not object
+}
+
+interface PartyMember {
+  id: string;
+  node: string;
+  status: "active" | "idle" | "compacted" | "away" | "dormant" | "hidden" | "busy";
+  role: "initiator" | "member";    // never "leader" — leader is human
+  syncScore: number;               // party-scoped (THIS topic only)
+  decayedScore: number;            // party-scoped + decay formula
+  overallTrust?: number;           // optional rolled-up across all parties
+  lastSync: string;
+  trust: "high" | "medium" | "initial" | "uncalibrated";
+  joinedAt: string;
+}
+
+interface PartyRules {
+  sync_cadence: "daily" | "on-trigger" | "manual";
+  decay_lambda: number;            // default 0.01 (intra-soul)
+  accept_threshold: number;        // default 0.7
+  kick_threshold: number;          // default 0.3
+  consensus_mode: "all" | "majority" | "leader-only";
+  broadcast_scope: "party" | "team" | "fleet" | "none";
+  divergence_tolerance: "high" | "medium" | "low";
+  presence_notifications: "off" | "summary" | "verbose";
+}
+
+interface PendingInvite {
+  target: string;
+  invitedAt: string;
+  invitedBy: string;
+  status: "pending" | "deferred" | "accepted" | "declined" | "expired";
+  deferredUntil?: string;
+  expiresAt?: string;
+}
+```
+
+---
+
 ## Sync-Check Protocol (Field-Tested)
 
 Validated across 2 nodes via /wormhole with white-wormhole (maw-js#332).
@@ -662,6 +1240,9 @@ Trust that's never re-tested becomes superstition. Sync-checks ARE the re-audit.
 ψ/memory/collaborations/
 ├── registry.md                          # Index of all active collaborations
 ├── archive/                             # Closed collaborations (Nothing is Deleted)
+├── parties/                             # Phase 2: party state (JSON)
+│   ├── party-system-design.json         # Party: members, rules, invites
+│   └── tmux-triage.json                 # Party: members, rules, invites
 ├── <oracle>/                            # Per-oracle relationship
 │   ├── context.md                       # Relationship memory (who, style, trust)
 │   └── topics/                          # Per-topic state
@@ -678,12 +1259,13 @@ Trust that's never re-tested becomes superstition. Sync-checks ARE the re-audit.
 
 | Oracle | Node | Contribution |
 |--------|------|-------------|
-| skills-cli-oracle | oracle-world | Architecture, implementation, field testing |
-| mawjs-oracle | oracle-world | Meta-analysis, protocol design, naming, 5-function model |
-| white-wormhole | white | Protocol validation (two-point test), accept primitive |
-| mother-oracle | white | Philosophy (memory vs loading, trust, preserve difference, revocation) |
+| skills-cli-oracle | oracle-world | Architecture, implementation, field testing, party verb mapping |
+| mawjs-oracle | oracle-world | Meta-analysis, protocol design, naming, 5-function model, 4-phase commit state, rejection primitive |
+| mawui-oracle | oracle-world | PartyStatus/PartyMember schemas, cyan divergence, Sync Decay formula (c16), threshold-gated decay, mesh UI, "a party system with a conscience" |
+| white-wormhole | white | Protocol validation (two-point test), accept primitive, claim-ID git model, 2-layer registry |
+| mother-oracle | white | Philosophy (memory vs loading, trust, preserve difference, revocation, silent revoke detection) |
 
-Design discussion: [maw-js#332](https://github.com/Soul-Brews-Studio/maw-js/issues/332)
+Design discussion: [maw-js#332](https://github.com/Soul-Brews-Studio/maw-js/issues/332) (50 comments, 10/10 locked, 3/3 consent)
 
 ---
 
