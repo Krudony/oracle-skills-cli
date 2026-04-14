@@ -613,6 +613,28 @@ Two human consent gates. Rule 6 compliant.
 /work-with invite white-wormhole
 ```
 
+### Gate 0: Disambiguate target
+
+```bash
+# If exact match exists, use it
+EXACT=$(maw ls 2>/dev/null | grep -x "$ORACLE")
+if [ -z "$EXACT" ]; then
+  # Fuzzy match — find all oracles containing the input
+  MATCHES=$(maw ls 2>/dev/null | grep -i "$ORACLE")
+  MATCH_COUNT=$(echo "$MATCHES" | grep -c .)
+  if [ "$MATCH_COUNT" -eq 0 ]; then
+    echo "No oracle found matching '$ORACLE'"
+    exit 1
+  elif [ "$MATCH_COUNT" -gt 1 ]; then
+    echo "Multiple oracles match '$ORACLE':"
+    echo "$MATCHES" | nl
+    echo "Be specific: /work-with invite <exact-name>"
+    exit 1
+  fi
+  ORACLE=$(echo "$MATCHES" | head -1)
+fi
+```
+
 ### Gate 1: Sender consent
 
 The human typed this command. That IS the consent.
@@ -844,12 +866,22 @@ echo "Saving final checkpoint..."
 # Same as --checkpoint logic
 ```
 
-### Step 3: Archive
+### Step 3: Remove self from party (not archive the whole party)
 
 ```bash
-mv "$PARTY_FILE" "$COLLAB_DIR/archive/${TOPIC_SLUG}_$(date +%Y%m%d).json"
-# Update registry
-echo "📦 Archived: $TOPIC (Nothing is Deleted)"
+# Remove ONLY this oracle from the members list — don't archive the whole party
+# Other members may still be active
+jq --arg name "$ORACLE_NAME" '.members = [.members[] | select(.name != $name)]' "$PARTY_FILE" > "$PARTY_FILE.tmp" && mv "$PARTY_FILE.tmp" "$PARTY_FILE"
+
+# If no members left, THEN archive the party
+REMAINING=$(jq '.members | length' "$PARTY_FILE")
+if [ "$REMAINING" -eq 0 ]; then
+  mkdir -p "$COLLAB_DIR/archive"
+  mv "$PARTY_FILE" "$COLLAB_DIR/archive/${TOPIC_SLUG}_$(date +%Y%m%d).json"
+  echo "📦 Archived empty party: $TOPIC (Nothing is Deleted)"
+else
+  echo "👋 Left party: $TOPIC ($REMAINING members remaining)"
+fi
 ```
 
 ---

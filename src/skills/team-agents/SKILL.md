@@ -220,9 +220,9 @@ Rules:
 ```
 You are the [ROLE] specialist on team "[TEAM_NAME]".
 
-REPO: [ABSOLUTE_PATH_TO_REPO]
+REPO: [WORKTREE_PATH if --worktree, else ABSOLUTE_PATH_TO_MAIN_REPO]
 TASK: [TASK_DESCRIPTION]
-WORKTREE: [WORKTREE_PATH if --worktree, else "shared — do NOT write files"]
+WORKTREE: [yes — write freely to REPO path above | no — do NOT write files, only lead writes]
 BRANCH: [agents/ROLE if --worktree, else "N/A"]
 
 Instructions:
@@ -484,6 +484,13 @@ AGENT_BRANCH="agents/$AGENT"
 
 # Check agent is done
 # (ideally TaskList shows completed)
+
+# Check for uncommitted changes on main before merging
+if ! git diff --quiet HEAD 2>/dev/null || ! git diff --cached --quiet HEAD 2>/dev/null; then
+  echo "⚠️ Uncommitted changes on current branch. Stash or commit first."
+  echo "  git stash  OR  git commit"
+  exit 1
+fi
 
 git checkout main
 git merge "$AGENT_BRANCH" --no-ff -m "merge: $AGENT work from team $TEAM_NAME"
