@@ -46,6 +46,7 @@ case "$CMD" in
   status)
     TEAM_NAME="${1:-}"
     SESSION=$(tmux display-message -p '#S' 2>/dev/null || echo "")
+    # NOTE: tmux display-message kept for session name detection (maw doesn't expose this yet)
 
     echo ""
     echo "🤖 Team Ops Status"
@@ -87,7 +88,7 @@ print(', '.join(m['name'] for m in config.get('members', [])))
 
     # Panes
     if [ -n "$SESSION" ]; then
-      PANE_COUNT=$(tmux list-panes -t "$SESSION" | wc -l)
+      PANE_COUNT=$(maw panes 2>/dev/null | wc -l)
       echo "  Panes: $PANE_COUNT in $SESSION"
     else
       echo "  Panes: not in tmux"

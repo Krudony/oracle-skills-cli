@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # team-ops doctor — detect ghost agents by cross-referencing team config with live processes
 # Usage: doctor.sh [--fix]
+# v2: Uses maw panes/capture/tag instead of raw tmux
 
 FIX=false
 [ "$1" = "--fix" ] && FIX=true
@@ -43,13 +44,13 @@ for m in config.get('members', []):
         fi
       done
 
-      # Check tmux pane
+      # Check pane via maw capture
       SESSION=$(tmux display-message -p '#S' 2>/dev/null)
       PANE_ALIVE=false
       if [ -n "$SESSION" ]; then
-        PANE_COUNT=$(tmux list-panes -t "$SESSION" 2>/dev/null | wc -l)
+        PANE_COUNT=$(maw panes 2>/dev/null | wc -l)
         for i in $(seq 1 $((PANE_COUNT - 1))); do
-          CAPTURE=$(tmux capture-pane -t "$SESSION:0.$i" -p 2>/dev/null | tail -3)
+          CAPTURE=$(maw capture "$SESSION" --pane "$i" --lines 3 2>/dev/null)
           if echo "$CAPTURE" | grep -qi "$NAME"; then
             PANE_ALIVE=true
             break
@@ -89,7 +90,6 @@ for repo in ~/Code/github.com/Soul-Brews-Studio/*/; do
       ORPHAN_WTS=$((ORPHAN_WTS + 1))
 
       if [ "$FIX" = true ]; then
-        ARCHIVE="/tmp/worktree-$name-$(date +%Y%m%d_%H%M%S)"
         cd "$repo" && git worktree remove "$wt" --force 2>/dev/null
         echo "       → Removed worktree"
       fi
@@ -106,7 +106,6 @@ STALE_TASKS=0
 for task_dir in "$HOME/.claude/tasks"/*/; do
   [ -d "$task_dir" ] || continue
   name=$(basename "$task_dir")
-  # Check if corresponding team exists
   if [ ! -d "$HOME/.claude/teams/$name" ]; then
     echo "    ⚠️ Stale: ~/.claude/tasks/$name/ (no matching team)"
     STALE_TASKS=$((STALE_TASKS + 1))
@@ -122,19 +121,22 @@ done
 
 echo ""
 
-# 4. Check ghost panes (tmux panes with dead claude processes)
+# 4. Check ghost panes via maw panes --pid
 echo "  Tmux panes:"
 GHOST_PANES=0
 SESSION=$(tmux display-message -p '#S' 2>/dev/null)
 if [ -n "$SESSION" ]; then
-  PANE_COUNT=$(tmux list-panes -t "$SESSION" 2>/dev/null | wc -l)
+  # Use maw panes --pid to get PIDs
+  PANE_COUNT=$(maw panes 2>/dev/null | wc -l)
   for i in $(seq 1 $((PANE_COUNT - 1))); do
-    PANE_PID=$(tmux list-panes -t "$SESSION" -F "#{pane_index} #{pane_pid}" 2>/dev/null | awk -v idx="$i" '$1==idx {print $2}')
+    # Get PID via maw panes --pid
+    PANE_PID=$(maw panes "$SESSION" --pid 2>/dev/null | awk -v idx="$i" 'NR==idx+1 {print}' | grep -oP '\d+' | tail -1)
+    [ -z "$PANE_PID" ] && continue
+
     CLAUDE_PID=$(pstree -p "$PANE_PID" 2>/dev/null | grep -oP 'claude\((\d+)\)' | grep -oP '\d+' | head -1)
 
     if [ -z "$CLAUDE_PID" ]; then
-      # Pane exists but no claude process
-      CAPTURE=$(tmux capture-pane -t "$SESSION:0.$i" -p 2>/dev/null | tail -1)
+      CAPTURE=$(maw capture "$SESSION" --pane "$i" --lines 1 2>/dev/null)
       if echo "$CAPTURE" | grep -q '^❯'; then
         echo "    👻 Pane $i — idle shell (no claude)"
         GHOST_PANES=$((GHOST_PANES + 1))

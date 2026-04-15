@@ -18,11 +18,11 @@ fi
 SKILLS_DIR="$HOME/.claude/skills"
 CREATED=0
 
-# Tag tmux panes with agent names (#225)
+# Tag tmux panes with agent names via maw tag (#225)
 SESSION=$(tmux display-message -p '#S' 2>/dev/null)
 tag_panes() {
   [ -z "$SESSION" ] && return
-  local PANE_COUNT=$(tmux list-panes -t "$SESSION" 2>/dev/null | wc -l)
+  local PANE_COUNT=$(maw panes 2>/dev/null | wc -l)
   local AGENT_IDX=0
 
   # Team agents are the newest panes (highest index)
@@ -30,14 +30,11 @@ tag_panes() {
   [ "$FIRST_TEAM_PANE" -lt 1 ] && FIRST_TEAM_PANE=1
 
   for i in $(seq "$FIRST_TEAM_PANE" $((PANE_COUNT - 1))); do
-    local PANE_ID=$(tmux list-panes -t "$SESSION" -F "#{pane_index} #{pane_id}" 2>/dev/null | awk -v idx="$i" '$1==idx {print $2}')
-    [ -z "$PANE_ID" ] && continue
     [ "$AGENT_IDX" -ge "${#AGENTS[@]}" ] && break
 
     local AGENT="${AGENTS[$AGENT_IDX]}"
-    tmux select-pane -t "$PANE_ID" -T "${AGENT}@${TEAM_NAME}" 2>/dev/null
-    tmux set-option -p -t "$PANE_ID" @agent-name "$AGENT" 2>/dev/null
-    tmux set-option -p -t "$PANE_ID" @team-name "$TEAM_NAME" 2>/dev/null
+    maw tag "$SESSION" --pane "$i" --title "${AGENT}@${TEAM_NAME}" \
+      --meta "agent-name=$AGENT" --meta "team-name=$TEAM_NAME" 2>/dev/null
     AGENT_IDX=$((AGENT_IDX + 1))
   done
 }
@@ -106,6 +103,6 @@ tag_panes
 
 echo ""
 echo "  Created $CREATED agent skills for team $TEAM_NAME"
-[ -n "$SESSION" ] && echo "  🏷️ Tagged tmux panes with @agent-name"
+[ -n "$SESSION" ] && echo "  🏷️ Tagged panes via maw tag (@agent-name, @team-name)"
 echo "  💡 Restart Claude Code to activate, or they load on next /command"
 echo ""

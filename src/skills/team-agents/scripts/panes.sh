@@ -26,8 +26,8 @@ echo "  Pane  Agent        Model        Color   Team         Ctx    Status   PID
 echo "  ───── ──────────── ──────────── ─────── ──────────── ────── ──────── ──────"
 
 for i in $(seq 0 $((PANE_COUNT - 1))); do
-  # Get pane pid (still need tmux for pid — maw panes doesn't expose it yet)
-  PANE_PID=$(tmux list-panes -t "$SESSION" -F "#{pane_index} #{pane_pid}" 2>/dev/null | awk -v idx="$i" '$1==idx {print $2}')
+  # Get pane pid via maw panes --pid
+  PANE_PID=$(maw panes "$SESSION" --pid 2>/dev/null | awk -v idx="$i" 'NR==idx+1 {print}' | grep -oP '\d+' | tail -1)
   [ -z "$PANE_PID" ] && continue
 
   # Find claude process in pane's process tree
