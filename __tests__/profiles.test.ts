@@ -15,9 +15,9 @@ const ALL_SKILLS = [
 const ZOMBIE_LIST = [...ZOMBIE_SKILLS] as string[];
 
 describe("profiles", () => {
-  it("standard has 12 skills", () => {
-    expect(STANDARD_SKILLS).toHaveLength(12);
-    expect(profiles.standard.include).toHaveLength(12);
+  it("standard has 13 skills", () => {
+    expect(STANDARD_SKILLS).toHaveLength(13);
+    expect(profiles.standard.include).toHaveLength(13);
   });
 
   it("full excludes lab-only skills", () => {
@@ -42,8 +42,8 @@ describe("profiles", () => {
     expect([...STANDARD_SKILLS]).not.toContain("feel");
   });
 
-  it("LAB_SKILLS has 19 experimental skills", () => {
-    expect(LAB_SKILLS).toHaveLength(19);
+  it("LAB_SKILLS has 18 experimental skills", () => {
+    expect(LAB_SKILLS).toHaveLength(18);
   });
 
   it("ZOMBIE_SKILLS has 13 internal development candidates", () => {
@@ -72,9 +72,9 @@ describe("profiles", () => {
 });
 
 describe("resolveProfile", () => {
-  it("standard returns 12 skills", () => {
+  it("standard returns 13 skills", () => {
     const result = resolveProfile("standard", ALL_SKILLS);
-    expect(result).toHaveLength(12);
+    expect(result).toHaveLength(13);
   });
 
   it("full returns all minus lab-only and zombies", () => {

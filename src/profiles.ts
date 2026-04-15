@@ -1,7 +1,7 @@
 /**
  * Skill profiles — 3 tiers, single source of truth.
  *
- * standard: daily driver (default) — 13 essential skills (data-driven, session 8)
+ * standard: daily driver (default) — 13 essential skills (data-driven, session 8+9)
  * full: all stable skills (excludes lab-only experiments)
  * lab: everything including experimental / bleeding edge
  *
@@ -13,13 +13,13 @@
 
 /** Standard profile — daily driver skills (always installed) */
 export const STANDARD_SKILLS = [
-  'awaken', 'bud', 'dig', 'forward', 'go',
+  'awaken', 'bampenpien', 'bud', 'dig', 'forward', 'go',
   'learn', 'recap', 'rrr', 'talk-to', 'team-agents', 'trace', 'xray',
 ] as const;
 
 /** Lab-only skills — experimental, not in standard or full */
 export const LAB_SKILLS = [
-  'bampenpien', 'contacts', 'dream', 'feel', 'fleet', 'harden',
+  'contacts', 'dream', 'feel', 'fleet', 'harden',
   'i-believed', 'inbox', 'machines', 'mailbox', 'morpheus',
   'release', 'schedule', 'vault', 'warp', 'watch', 'work-with', 'worktree', 'wormhole',
 ] as const;
