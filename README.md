@@ -106,7 +106,7 @@ npx arra-oracle-skills@3.9.0-alpha.14 install -g -y --agent claude-code codex op
 
 | Profile | Count | Skills |
 |---------|-------|--------|
-| **starter** | 5 | `about-oracle`, `forward-lite`, `go`, `recap-lite`, `rrr-lite` |
+| **starter** | 6 | `about-oracle`, `forward-lite`, `go`, `recap-lite`, `rrr-lite`, `trace` |
 | **standard** | 13 | `awaken`, `bampenpien`, `bud`, `dig`, `forward`, `go`, `learn`, `recap`, `rrr`, `talk-to`, `team-agents`, `trace`, `xray` |
 | **full** | 60 | all |
 | **lab** | 60 | all |
