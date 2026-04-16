@@ -1,6 +1,7 @@
 /**
  * Skill profiles — 3 tiers, single source of truth.
  *
+ * starter: newcomer essentials — 6 skills (try Oracle, then /go standard)
  * standard: daily driver (default) — 13 essential skills (data-driven, session 8+9)
  * full: all stable skills (excludes lab-only experiments)
  * lab: everything including experimental / bleeding edge
@@ -10,6 +11,11 @@
  * oracle-soul-sync-update (6), standup (10), skills-list (3), oracle-family-scan (8).
  * These move to full (still installable, not lab-gated).
  */
+
+/** Starter profile — newcomer essentials (try Oracle, then graduate to standard) */
+export const STARTER_SKILLS = [
+  'about-oracle', 'go', 'philosophy', 'recap', 'trace', 'who-are-you',
+] as const;
 
 /** Standard profile — daily driver skills (always installed) */
 export const STANDARD_SKILLS = [
@@ -37,6 +43,9 @@ export const ZOMBIE_SKILLS = [
 export const labOnly = [...LAB_SKILLS] as string[];
 
 export const profiles: Record<string, { include?: string[]; exclude?: string[] }> = {
+  starter: {
+    include: [...STARTER_SKILLS],
+  },
   standard: {
     include: [...STANDARD_SKILLS],
   },

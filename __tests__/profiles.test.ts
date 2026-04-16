@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { profiles, labOnly, STANDARD_SKILLS, LAB_SKILLS, ZOMBIE_SKILLS, resolveProfile } from "../src/profiles";
+import { profiles, labOnly, STARTER_SKILLS, STANDARD_SKILLS, LAB_SKILLS, ZOMBIE_SKILLS, resolveProfile } from "../src/profiles";
 
 // Simulated full skill list — must include all standard + lab + zombie + other discovered skills
 const ALL_SKILLS = [
@@ -15,6 +15,15 @@ const ALL_SKILLS = [
 const ZOMBIE_LIST = [...ZOMBIE_SKILLS] as string[];
 
 describe("profiles", () => {
+  it("starter has 6 skills", () => {
+    expect(STARTER_SKILLS).toHaveLength(6);
+    expect(profiles.starter.include).toHaveLength(6);
+  });
+
+  it("starter includes go for upgrade path", () => {
+    expect(STARTER_SKILLS).toContain("go");
+  });
+
   it("standard has 13 skills", () => {
     expect(STANDARD_SKILLS).toHaveLength(13);
     expect(profiles.standard.include).toHaveLength(13);
@@ -72,6 +81,11 @@ describe("profiles", () => {
 });
 
 describe("resolveProfile", () => {
+  it("starter returns 6 skills", () => {
+    const result = resolveProfile("starter", ALL_SKILLS);
+    expect(result).toHaveLength(6);
+  });
+
   it("standard returns 13 skills", () => {
     const result = resolveProfile("standard", ALL_SKILLS);
     expect(result).toHaveLength(13);
