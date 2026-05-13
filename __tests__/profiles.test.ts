@@ -7,10 +7,10 @@ const ALL_SKILLS = [
   ...LAB_SKILLS,
   ...ZOMBIE_SKILLS,
   ...MINIMAL_ONLY_SKILLS,
-  // Full/other skills (not standard, not lab-only, not minimal-only)
-  "about-oracle", "auto-retrospective", "create-shortcut", "incubate",
-  "oracle-family-scan", "oracle-soul-sync-update", "philosophy", "project",
-  "resonance", "skills-list", "standup", "where-we-are", "who-are-you",
+  // Full/other skills (not standard, not lab-only, not minimal-only, not zombie)
+  "about-oracle", "create-shortcut", "incubate",
+  "oracle-family-scan", "oracle-soul-sync-update", "project",
+  "standup", "where-we-are", "who-are-you",
 ].sort();
 
 const ZOMBIE_LIST = [...ZOMBIE_SKILLS] as string[];
@@ -25,9 +25,9 @@ describe("profiles", () => {
     expect(MINIMAL_SKILLS).toContain("go");
   });
 
-  it("standard has 13 skills", () => {
-    expect(STANDARD_SKILLS).toHaveLength(13);
-    expect(profiles.standard.include).toHaveLength(13);
+  it("standard has 12 skills", () => {
+    expect(STANDARD_SKILLS).toHaveLength(12);
+    expect(profiles.standard.include).toHaveLength(12);
   });
 
   it("full excludes lab-only AND minimal-only skills (post-#285)", () => {
@@ -52,12 +52,12 @@ describe("profiles", () => {
     expect([...STANDARD_SKILLS]).not.toContain("feel");
   });
 
-  it("LAB_SKILLS has 18 experimental skills", () => {
-    expect(LAB_SKILLS).toHaveLength(18);
+  it("LAB_SKILLS has 6 experimental skills (post-#327 cull)", () => {
+    expect(LAB_SKILLS).toHaveLength(6);
   });
 
-  it("ZOMBIE_SKILLS has 13 internal development candidates", () => {
-    expect(ZOMBIE_SKILLS).toHaveLength(13);
+  it("ZOMBIE_SKILLS has 32 internal/archived candidates (13 original + 18 culled + 1 imported)", () => {
+    expect(ZOMBIE_SKILLS).toHaveLength(32);
   });
 
   it("labOnly matches LAB_SKILLS", () => {
@@ -120,9 +120,9 @@ describe("resolveProfile", () => {
     expect(result).toHaveLength(7);
   });
 
-  it("standard returns 13 skills", () => {
+  it("standard returns 12 skills", () => {
     const result = resolveProfile("standard", ALL_SKILLS);
-    expect(result).toHaveLength(13);
+    expect(result).toHaveLength(12);
   });
 
   it("full returns all minus lab-only, minimal-only, and zombies", () => {

@@ -74,7 +74,7 @@ describe("fix #275 — scripts-list skill has scripts/ in source", () => {
   it("src/skills/skills-list/scripts/skills-list.py exists in source", () => {
     const scriptPath = join(
       process.cwd(),
-      "src/skills/skills-list/scripts/skills-list.py"
+      "src/skills/.archive/skills-list/scripts/skills-list.py"
     );
     expect(existsSync(scriptPath)).toBe(true);
   });
@@ -82,7 +82,7 @@ describe("fix #275 — scripts-list skill has scripts/ in source", () => {
   it("skills-list.py is executable Python script", async () => {
     const scriptPath = join(
       process.cwd(),
-      "src/skills/skills-list/scripts/skills-list.py"
+      "src/skills/.archive/skills-list/scripts/skills-list.py"
     );
     const content = await Bun.file(scriptPath).text();
     expect(content).toContain("#!/usr/bin/env python3");
@@ -166,7 +166,7 @@ describe("fix #275 — installer copies scripts/ subdirectory (global install)",
       join(SKILLS_DIR, "skills-list", "scripts", "skills-list.py")
     ).text();
     const sourceScript = await Bun.file(
-      join(process.cwd(), "src/skills/skills-list/scripts/skills-list.py")
+      join(process.cwd(), "src/skills/.archive/skills-list/scripts/skills-list.py")
     ).text();
     expect(installedScript).toBe(sourceScript);
   });
