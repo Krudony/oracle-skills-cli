@@ -2,6 +2,9 @@
 name: work-with
 description: 'Persistent cross-oracle collaboration with synchronic scoring and party system. Use when user says "work with", "sync with", "collaborate", "organize party", "invite", "recruit", or wants to establish/check persistent collaboration with another oracle.'
 argument-hint: "<oracle> [topic] [--sync | --checkpoint | --status | --broadcast | --fleet-status | --close | --defer | --state] | organize | invite | who | tell | leave | --recruit | --team | --pending | --deferred | --sweep-timeouts"
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /work-with — Persistent Cross-Oracle Collaboration

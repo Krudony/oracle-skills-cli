@@ -2,6 +2,9 @@
 name: skills-list
 description: 'List all Oracle skills with profile tier, type, and script status. Use when user says "skills list", "show skills", "what skills", "list all skills", "how many skills", or wants to see available skills by profile.'
 argument-hint: "[--json]"
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /skills-list — Show All Skills

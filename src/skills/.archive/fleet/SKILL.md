@@ -2,7 +2,9 @@
 name: fleet
 description: 'Deep fleet census — discover all oracles across all nodes, collect versions, skills, status. Use when user says "fleet", "census", "all oracles", "fleet status", or wants a complete picture of the oracle network.'
 argument-hint: "[--quick | --deep | --diff | --map]"
-
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /fleet — Deep Fleet Census

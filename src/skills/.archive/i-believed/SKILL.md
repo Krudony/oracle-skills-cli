@@ -2,6 +2,9 @@
 name: i-believed
 description: "Declare belief — looking back or leaping forward. 'I believed in you' = it was worth it. 'I believe in you' = I choose trust now. Use when user says 'i believed', 'i believe', 'believed in you', 'believe in this', or expresses conviction in the collaboration. The rarest skill — most sessions never use it."
 argument-hint: "[in you | in this | in <something> | --history]"
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /i-believed — Declaration of Belief

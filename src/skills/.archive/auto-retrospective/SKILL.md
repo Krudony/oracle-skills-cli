@@ -3,6 +3,9 @@ name: auto-retrospective
 hidden: true
 description: Configure auto-rrr and auto-forward triggers based on context window usage. Use when user says "auto rrr", "auto-scale", "configure auto triggers", "change rrr interval", "toggle auto", or wants to adjust when /rrr and /forward auto-trigger. Do NOT trigger for running /rrr manually (use /rrr) or creating handoffs (use /forward).
 argument-hint: "[on | off | status | snooze <duration> | rrr:<interval>k | fwd:<interval>k]"
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /auto-retrospective — Configure Auto-Trigger Settings

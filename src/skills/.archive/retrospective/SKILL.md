@@ -2,6 +2,9 @@
 name: retrospective
 description: Quick session retrospective — summary, lessons, next steps. Use when user says "retrospective", "retro", "session summary", "wrap up session". Do NOT trigger for full /rrr (install arra-symbiosis-skills), session orientation (use /recap), or handoff (use /forward).
 argument-hint: "[--detail]"
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /retrospective — Session Retrospective

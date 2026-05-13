@@ -2,7 +2,9 @@
 name: warp
 description: 'Teleport to a remote oracle node via SSH+tmux. Interactive session — you BECOME the remote oracle temporarily. Use when user says "warp", "teleport", "ssh to node", "go to node", or needs interactive multi-step work on a remote machine.'
 argument-hint: "<node>:<agent> [--attach | --new | --list]"
-
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /warp — Teleport to Remote Node

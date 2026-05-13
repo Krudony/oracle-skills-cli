@@ -2,6 +2,9 @@
 name: machines
 description: 'Fleet machines — discover nodes from contacts, ping to prove alive, create local shortcuts. Use when user says "machines", "nodes", "fleet", or wants to see/reach machines in the fleet.'
 argument-hint: "[ping | list | setup | <node-name>]"
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /machines — Fleet Machines

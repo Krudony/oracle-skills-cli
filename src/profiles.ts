@@ -29,9 +29,8 @@ export const STANDARD_SKILLS = [
 
 /** Lab-only skills — experimental, not in standard or full */
 export const LAB_SKILLS = [
-  'contacts', 'dream', 'feel', 'fleet', 'harden',
-  'i-believed', 'inbox', 'machines', 'mailbox', 'morpheus',
-  'release', 'schedule', 'vault', 'warp', 'watch', 'work-with', 'worktree', 'wormhole',
+  'contacts', 'feel', 'fyi', 'inbox', 'mailbox', 'morpheus',
+  'schedule', 'watch', 'worktree',
 ] as const;
 
 /** Minimal-only skills — token-optimized lite variants that replace the full
@@ -51,9 +50,17 @@ export const MINIMAL_ONLY_SKILLS = [
  *  The installer + VFS generator know to also scan `.archive/` so the `-s`
  *  opt-in path keeps working unchanged. Nothing-is-Deleted preserved. */
 export const ZOMBIE_SKILLS = [
+  // Original 13 (from arra-symbiosis-skills)
   'alpha-feature', 'birth', 'deep-research', 'gemini', 'handover',
   'list-issues-pr-pulse', 'mine', 'new-issue', 'oracle-manage',
   'speak', 'what-we-done', 'whats-next', 'workon',
+  // 2026-05-13 cull (#327): 13 zombies based on usage audit (3,685 sessions).
+  // Kept active by explicit user request: bampenpien (standard), feel + morpheus (lab),
+  // fyi (lab, imported from oracle-proof-of-concept-skills), resonance (implicit-full).
+  'i-believed', 'work-with', 'dream',
+  'retrospective', 'auto-retrospective', 'skills-list',
+  'fleet', 'machines', 'warp', 'release',
+  'philosophy', 'wormhole', 'harden', 'vault',
 ] as const;
 
 /** Return the source directory for a skill by name — `.archive/` for zombies,

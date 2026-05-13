@@ -2,7 +2,9 @@
 name: harden
 description: 'Audit Oracle configuration for safety, governance, and hardening. Use when user says "harden", "audit", "security check", "governance", or wants to verify oracle setup.'
 argument-hint: "[--full | --secrets | --rules | --fix]"
-
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /harden — Oracle Governance Audit

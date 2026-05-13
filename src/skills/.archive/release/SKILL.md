@@ -2,7 +2,9 @@
 name: release
 description: 'Automated release flow — bump version, changelog, tag, push, GitHub release. Use when user says "release", "ship", "bump version", "tag", or "publish".'
 argument-hint: "<patch|minor|major> [--dry-run | --alpha | --no-push]"
-
+zombie: true
+archived_reason: 'moved to zombie tier via #327 (usage audit, 3,685 sessions mined)'
+archived_date: 2026-05-13
 ---
 
 # /release — Automated Release Flow
