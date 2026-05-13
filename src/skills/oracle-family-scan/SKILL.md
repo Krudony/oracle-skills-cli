@@ -28,16 +28,21 @@ Scan, query, and welcome the Oracle family. Powered by `registry/` in mother-ora
 
 ## Step 0: Locate Registry
 
-The registry lives in the opensource-nat-brain-oracle repo (public). Resolve the path:
+The registry's canonical home is `laris-co/mother-oracle/registry/` (where `sync.ts` + `oracles.json` actually live). The legacy `opensource-nat-brain-oracle` repo back-symlinks to it for back-compat. Resolve the path:
 
 ```bash
-# Try brain repo first (ghq-managed)
-MOTHER="$HOME/Code/github.com/Soul-Brews-Studio/opensource-nat-brain-oracle"
+# Try laris-co/mother-oracle (canonical home of sync.ts + oracles.json)
+MOTHER="$HOME/Code/github.com/laris-co/mother-oracle"
 if [ ! -d "$MOTHER/registry" ]; then
-  MOTHER="$(ghq root)/github.com/Soul-Brews-Studio/opensource-nat-brain-oracle"
+  MOTHER="$(ghq root)/github.com/laris-co/mother-oracle"
+fi
+# Fallback: legacy brain repo (back-symlinks to laris-co/mother-oracle)
+if [ ! -f "$MOTHER/registry/oracles.json" ]; then
+  MOTHER="$HOME/Code/github.com/Soul-Brews-Studio/opensource-nat-brain-oracle"
+  [ ! -d "$MOTHER/registry" ] && MOTHER="$(ghq root)/github.com/Soul-Brews-Studio/opensource-nat-brain-oracle"
 fi
 if [ ! -f "$MOTHER/registry/oracles.json" ]; then
-  echo "Registry not found. Run: ghq get -u Soul-Brews-Studio/opensource-nat-brain-oracle && bun $MOTHER/registry/sync.ts"
+  echo "Registry not found. Run: ghq get -u laris-co/mother-oracle && bun \$MOTHER/registry/sync.ts"
   exit 1
 fi
 ```
