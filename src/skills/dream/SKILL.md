@@ -22,6 +22,14 @@ argument-hint: "[--pain | --plan | --gain | --all]"
 
 ---
 
+## Step 0: Timestamp
+
+```bash
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
+```
+
+---
+
 ## How It Works
 
 Launch **5 parallel agents**, each searching a different dimension:

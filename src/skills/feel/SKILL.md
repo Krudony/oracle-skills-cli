@@ -19,6 +19,14 @@ argument-hint: "[--deep | --log]"
 
 ---
 
+## Step 0: Timestamp
+
+```bash
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
+```
+
+---
+
 ## Quick Pulse (default)
 
 Read the signals and report:

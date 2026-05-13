@@ -60,6 +60,7 @@ Claude Code's data dies with the session. Our data lives in the vault. Nothing i
 ## Step 0: Run the Script
 
 ```bash
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 bash ~/.claude/skills/mailbox/scripts/mailbox.sh [command] [args]
 ```
 
