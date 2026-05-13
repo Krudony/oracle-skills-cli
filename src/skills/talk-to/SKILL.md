@@ -30,6 +30,7 @@ If ARGUMENTS is empty, show usage help then run --list.
 **Always read contacts first.** This is the source of truth for agent routing.
 
 ```bash
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
 CONTACTS="$(pwd)/ψ/contacts.json"
 if [ ! -f "$CONTACTS" ]; then
   # Fallback path

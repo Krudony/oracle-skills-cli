@@ -16,7 +16,11 @@ description: Know ourselves — show current AI identity, model info, session st
 
 ## Step 0: Timestamp + Output Format
 
-_(Chain date with Step 1 bash call — don't call date alone)_
+```bash
+date "+🕐 %H:%M %Z (%A %d %B %Y)"
+```
+
+_(Chained with Step 1 bash call below — single date emission, then the gather block.)_
 
 ---
 
