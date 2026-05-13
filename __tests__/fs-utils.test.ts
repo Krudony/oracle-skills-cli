@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-const testDir = join(tmpdir(), 'oracle-skills-test-' + Date.now());
+const testDir = join(tmpdir(), 'arra-oracle-skills-test-' + Date.now());
 
 beforeEach(() => {
   mkdirSync(testDir, { recursive: true });

@@ -38,7 +38,7 @@ describe('CLI', () => {
 
   it('should show help', async () => {
     const result = await $`bun run src/cli/index.ts --help`.text();
-    expect(result).toContain('oracle-skills');
+    expect(result).toContain('arra-oracle-skills');
     expect(result).toContain('install');
     expect(result).toContain('uninstall');
     expect(result).toContain('agents');

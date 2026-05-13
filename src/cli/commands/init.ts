@@ -1,6 +1,6 @@
 import type { Command } from 'commander';
 import * as p from '@clack/prompts';
-import { agents, detectInstalledAgents } from '../agents.js';
+import { agents, getDefaultAgents } from '../agents.js';
 import { installSkills } from '../installer.js';
 import { profiles } from '../../profiles.js';
 
@@ -8,7 +8,7 @@ export function registerInit(program: Command, version: string) {
   program
     .command('init')
     .description('First-time setup: install minimal profile globally')
-    .option('-p, --profile <name>', 'Profile to install (default: minimal)', 'minimal')
+    .option('-p, --profile <name>', 'Profile to install (minimal, standard, full, lab)', 'minimal')
     .option('-y, --yes', 'Skip confirmation prompts')
     .action(async (options) => {
       p.intro(`🔮 Oracle Skills Init v${version}`);
@@ -21,7 +21,7 @@ export function registerInit(program: Command, version: string) {
           return;
         }
 
-        const detected = detectInstalledAgents();
+        const detected = getDefaultAgents();
         if (detected.length === 0) {
           p.log.error('No agents detected. Install Claude Code, Codex, or another supported agent first.');
           return;

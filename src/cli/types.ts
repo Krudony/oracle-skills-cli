@@ -35,6 +35,9 @@ export interface Skill {
   name: string;
   description: string;
   path: string;
+  hidden?: boolean; // If true, install SKILL.md but skip command stub (hidden from autocomplete)
+  secret?: boolean; // If true, excluded from ALL profiles — install only by name (-s flag)
+  zombie?: boolean; // If true, excluded from ALL profiles — internal development candidates, not for users
 }
 
 import type { ShellMode } from './fs-utils.js';
@@ -43,9 +46,10 @@ export interface InstallOptions {
   global?: boolean;
   skills?: string[];
   profile?: string;
-  features?: string[];
+  profileExplicit?: boolean; // #285: true when --profile was explicitly passed on CLI (not default)
   yes?: boolean;
   agents?: string[];
   commands?: boolean; // Also install command stubs (for agents with commandsOptIn)
+  forceGlobal?: boolean; // #230 Override local-skill-precedence check and install global anyway
   shellMode?: ShellMode;
 }

@@ -1,6 +1,6 @@
 ---
 name: project
-description: Clone and track external repos. Use when user shares GitHub URL to study or develop, or says "search repos", "find repo", "where is [project]". Actions - learn (clone for study), incubate (clone for development), search/find (search repos), list (show tracked).
+description: Clone and track external repos. Use when user shares GitHub URL to study or develop, or says "search repos", "find repo", "where is [project]". Actions - learn (clone for study), search/find (search repos), list (show tracked). For active development, use /incubate.
 argument-hint: "<github-url> | search <query>"
 ---
 
@@ -40,81 +40,11 @@ ln -sf "$GHQ_ROOT/github.com/owner/repo" ψ/learn/owner/repo
 
 **Output**: "✓ Linked [repo] to ψ/learn/owner/repo"
 
-### incubate [url|slug] [--offload|--contribute|--flash]
+### incubate — REDIRECTS TO /incubate
 
-Clone repo for **active development** with optional workflow flags.
-
-```bash
-# Same flow, different target
-ghq get -u https://github.com/owner/repo
-GHQ_ROOT=$(ghq root)
-mkdir -p ψ/incubate/owner
-ln -sf "$GHQ_ROOT/github.com/owner/repo" ψ/incubate/owner/repo
-```
-
-**Output**: "✓ Linked [repo] to ψ/incubate/owner/repo"
-
-#### Workflow Flags
-
-| Flag | Scope | Duration | Cleanup |
-|------|-------|----------|---------|
-| (none) | Long-term dev | Weeks/months | Manual |
-| `--offload` | Manual trigger | — | Remove symlink (keep ghq) |
-| `--contribute` | Multi-feature | Days/weeks | Offload when all done (keep ghq for PR feedback) |
-| `--flash` | Single fix | Minutes | Issue → PR → offload → purge (one shot) |
-
-#### --offload
-
-Remove symlink after work is done (manual trigger):
-
-```bash
-unlink ψ/incubate/owner/repo
-rmdir ψ/incubate/owner 2>/dev/null
-# ghq clone preserved for future use
-```
-
-#### --contribute
-
-For multi-feature contributions over days/weeks. Offload when ALL features are done:
-
-```bash
-# 1. Work on multiple features/fixes over time
-git -C ψ/incubate/owner/repo checkout -b feat/feature-1
-# ... work, commit, push, PR ...
-git -C ψ/incubate/owner/repo checkout -b feat/feature-2
-# ... work, commit, push, PR ...
-
-# 2. When all done, offload (ghq kept for PR feedback)
-unlink ψ/incubate/owner/repo
-```
-
-**Use case**: Extended contribution period. Keep ghq for addressing PR reviews.
-
-#### --flash
-
-Complete contribution cycle with full cleanup:
-
-```
-/project incubate URL --flash
-    ↓
-1. gh issue create → #N (document intent)
-    ↓
-2. ghq get → symlink to ψ/incubate/
-    ↓
-3. git checkout -b issue-N-description
-    ↓
-4. Make changes, commit
-    ↓
-5. git push → gh pr create --body "Closes #N"
-    ↓
-6. cd back to main repo
-    ↓
-7. Auto-offload + purge ghq clone
-    ↓
-"✓ Issue #N → PR #M → Offloaded & Purged"
-```
-
-**Use case**: Quick external contributions without leaving traces.
+> **`/project incubate` is now `/incubate`.**
+> If the user says `/project incubate [args]`, run `/incubate [args]` instead.
+> Do NOT execute incubate logic here — invoke the standalone `/incubate` skill with the same arguments.
 
 ### find [query]
 
@@ -132,23 +62,43 @@ find ψ/learn ψ/incubate -type l 2>/dev/null | grep -i "query"
 
 ### list
 
-Show all tracked projects:
+Show all tracked projects with rich metadata (#227):
 
 ```bash
-echo "📚 Learn"
-find ψ/learn -type l 2>/dev/null | while read link; do
-  target=$(readlink "$link")
-  echo "  ${link#ψ/learn/} → $target"
+echo "📦 Projects"
+echo ""
+
+# Collect all tracked repos (learn + incubate symlinks)
+REPOS=()
+for link in $(find ψ/learn ψ/incubate -name "origin" -type l 2>/dev/null | sort); do
+  dir=$(dirname "$link")
+  owner=$(basename "$(dirname "$dir")")
+  repo=$(basename "$dir")
+  type="learn"
+  echo "$link" | grep -q "incubate" && type="incubate"
+  REPOS+=("$owner/$repo:$type")
 done
 
-echo "🌱 Incubate"
-find ψ/incubate -type l 2>/dev/null | while read link; do
-  target=$(readlink "$link")
-  echo "  ${link#ψ/incubate/} → $target"
-done
+if [ ${#REPOS[@]} -eq 0 ]; then
+  echo "  No tracked projects. Use /learn or /incubate to add."
+else
+  printf "  %-35s %-6s %-8s %-8s %s\n" "Repo" "Stars" "License" "Type" "Description"
+  printf "  %-35s %-6s %-8s %-8s %s\n" "───────────────────────────────────" "──────" "────────" "────────" "──────────────────────"
 
-echo "🏠 External (ghq)"
-ghq list | grep -v "laris-co/Nat-s-Agents" | head -10
+  for entry in "${REPOS[@]}"; do
+    slug="${entry%%:*}"
+    type="${entry##*:}"
+    # Fetch metadata from GitHub (cached per session)
+    meta=$(gh api "repos/$slug" --jq '"\(.stargazers_count)\t\(.license.spdx_id // "none")\t\(.description // "-" | .[0:40])"' 2>/dev/null || echo "?\tnone\t-")
+    stars=$(echo "$meta" | cut -f1)
+    license=$(echo "$meta" | cut -f2)
+    desc=$(echo "$meta" | cut -f3)
+    printf "  %-35s %-6s %-8s %-8s %s\n" "$slug" "⭐$stars" "$license" "$type" "$desc"
+  done
+fi
+
+echo ""
+echo "  Total: ${#REPOS[@]} tracked repos"
 ```
 
 ## Directory Structure
@@ -182,26 +132,13 @@ User: "I want to learn from https://github.com/SawyerHood/dev-browser"
 → mkdir -p ψ/learn/SawyerHood
 → ln -sf ~/Code/github.com/SawyerHood/dev-browser ψ/learn/SawyerHood/dev-browser
 
-# User wants to develop long-term
+# User wants to develop → redirect to /incubate
 User: "I want to work on claude-mem"
-→ /project incubate https://github.com/thedotmack/claude-mem
-→ Symlink created, work until done
+→ /incubate https://github.com/thedotmack/claude-mem
 
-# User wants to contribute (keep ghq for follow-up)
-User: "Fix a bug in arra-oracle-v3"
-→ /project incubate https://github.com/Soul-Brews-Studio/arra-oracle-v3 --contribute
-→ [edit, commit, push]
-→ Auto-offload, ghq kept for PR feedback
-
-# User wants quick flash contribution (full cleanup)
-User: "Quick README fix on oracle-skills-cli"
-→ /project incubate https://github.com/Soul-Brews-Studio/oracle-skills-cli --flash
-→ Issue #17 created
-→ Branch: issue-17-fix-readme
-→ [edit, commit, push]
-→ PR #18 created (Closes #17)
-→ Auto-offload + purge
-→ "✓ Issue #17 → PR #18 → Offloaded & Purged"
+# User says "/project incubate" → redirect to /incubate
+User: "/project incubate https://github.com/Soul-Brews-Studio/arra-oracle-v3 --contribute"
+→ /incubate https://github.com/Soul-Brews-Studio/arra-oracle-v3 --contribute
 ```
 
 ## Anti-Patterns
@@ -219,28 +156,12 @@ User: "Quick README fix on oracle-skills-cli"
 # Add to learn
 ghq get -u URL && mkdir -p ψ/learn/owner && ln -sf "$(ghq root)/github.com/owner/repo" ψ/learn/owner/repo
 
-# Add to incubate
-ghq get -u URL && mkdir -p ψ/incubate/owner && ln -sf "$(ghq root)/github.com/owner/repo" ψ/incubate/owner/repo
-
-# Offload (remove symlink only)
-unlink ψ/incubate/owner/repo && rmdir ψ/incubate/owner 2>/dev/null
-
-# Offload + purge (remove symlink AND ghq clone)
-unlink ψ/incubate/owner/repo && rm -rf "$(ghq root)/github.com/owner/repo"
+# Incubate (use standalone /incubate skill)
+/incubate URL [--flash | --contribute | --status | --offload]
 
 # Update source
 ghq get -u URL
 
 # Find repo
 ghq list | grep name
-```
-
-## Workflow Intensity Scale
-
-```
-incubate        → Long-term dev (manual cleanup)
-    ↓
---contribute    → Push → offload (keep ghq)
-    ↓
---flash         → Issue → Branch → PR → offload → purge (complete cycle)
 ```

@@ -1,8 +1,8 @@
 import type { Command } from 'commander';
 import * as p from '@clack/prompts';
-import { agents, detectInstalledAgents, getAgentNames } from '../agents.js';
+import { agents, getDefaultAgents, getAgentNames } from '../agents.js';
 import { listSkills, installSkills } from '../installer.js';
-import { profiles, features as featuresDef } from '../../profiles.js';
+import { profiles } from '../../profiles.js';
 import type { ShellMode } from '../fs-utils.js';
 
 export function registerInstall(program: Command, version: string) {
@@ -12,14 +12,14 @@ export function registerInstall(program: Command, version: string) {
     .option('-g, --global', 'Install to user directory instead of project')
     .option('-a, --agent <agents...>', 'Target specific agents (e.g., claude-code, opencode)')
     .option('-s, --skill <skills...>', 'Install specific skills by name')
-    .option('-p, --profile <name>', 'Install a skill profile (seed, minimal, standard, full)')
-    .option('-f, --feature <features...>', 'Add feature modules (soul, network, workspace, creator)')
+    .option('-p, --profile <name>', 'Install a skill profile (minimal, standard, full, lab)', 'minimal')
     .option('-l, --list', 'List available skills without installing')
     .option('-y, --yes', 'Skip confirmation prompts')
-    .option('--commands', 'Also install command stubs to ~/.claude/commands/')
+    .option('--with-commands', 'Also install command stubs to ~/.claude/commands/')
+    .option('--force-global', 'Install global skills even if a same-named local skill exists (#230)')
     .option('--shell', 'Force Bun.$ shell commands (use on Windows to test shell compatibility)')
     .option('--no-shell', 'Force Node.js fs operations (use on Unix if Bun.$ causes issues)')
-    .action(async (options) => {
+    .action(async (options, cmd) => {
       p.intro(`🔮 Oracle Skills Installer v${version}`);
 
       try {
@@ -32,7 +32,7 @@ export function registerInstall(program: Command, version: string) {
         let targetAgents: string[] = options.agent || [];
 
         if (targetAgents.length === 0) {
-          const detected = detectInstalledAgents();
+          const detected = getDefaultAgents();
 
           if (detected.length > 0) {
             p.log.info(`Detected agents: ${detected.map((a) => agents[a as keyof typeof agents]?.displayName).join(', ')}`);
@@ -93,22 +93,19 @@ export function registerInstall(program: Command, version: string) {
           return;
         }
 
-        if (options.feature) {
-          const invalidFeatures = options.feature.filter((f: string) => !featuresDef[f]);
-          if (invalidFeatures.length > 0) {
-            p.log.error(`Unknown features: ${invalidFeatures.join(', ')}`);
-            p.log.info(`Available features: ${Object.keys(featuresDef).join(', ')}`);
-            return;
-          }
-        }
+        // Detect whether --profile was explicitly passed on CLI or came from the default value.
+        // Commander exposes this via getOptionValueSource: 'cli' = user typed it, 'default' = default.
+        const profileSource = (cmd as any).getOptionValueSource?.('profile') ?? 'default';
+        const profileExplicit = profileSource === 'cli';
 
         await installSkills(targetAgents, {
           global: options.global,
           skills: options.skill,
           profile: options.profile,
-          features: options.feature,
+          profileExplicit,
           yes: options.yes,
-          commands: options.commands,
+          commands: options.withCommands,
+          forceGlobal: options.forceGlobal,
           shellMode,
         });
 
@@ -119,13 +116,12 @@ export function registerInstall(program: Command, version: string) {
   🔮 Oracle Skills v${version} — Awakened
 
   CLI Commands:
-    oracle-skills agents             # list supported agents
-    oracle-skills about              # prereqs + system status
-    oracle-skills list -g            # show installed skills
-    oracle-skills profiles           # list profiles
-    oracle-skills select -g          # interactive skill picker
-    oracle-skills install -g -y      # reinstall all skills
-    oracle-skills uninstall -g -y    # remove all skills
+    arra-oracle-skills agents             # list supported agents
+    arra-oracle-skills about              # prereqs + system status
+    arra-oracle-skills list -g            # show installed skills
+    arra-oracle-skills select -g          # interactive skill picker
+    arra-oracle-skills install -g -y      # reinstall all skills
+    arra-oracle-skills uninstall -g -y    # remove all skills
 
   Restart your agent to activate skills.
 `);

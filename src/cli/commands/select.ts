@@ -2,7 +2,6 @@ import type { Command } from 'commander';
 import * as p from '@clack/prompts';
 import { agents, detectInstalledAgents } from '../agents.js';
 import { installSkills, discoverSkills } from '../installer.js';
-import { profiles } from '../../profiles.js';
 import type { ShellMode } from '../fs-utils.js';
 
 export function registerSelect(program: Command, version: string) {
@@ -23,15 +22,6 @@ export function registerSelect(program: Command, version: string) {
           p.log.error('No skills found');
           return;
         }
-
-        const profileInfo = Object.entries(profiles)
-          .filter(([name]) => name !== 'seed')
-          .map(([name, prof]) => {
-            const count = prof.include?.length || allSkills.length;
-            return `${name} (${count})`;
-          })
-          .join(', ');
-        p.log.info(`Profiles: ${profileInfo}`);
 
         const detected = detectInstalledAgents();
         let targetAgents: string[] = options.agent || detected;
@@ -54,9 +44,10 @@ export function registerSelect(program: Command, version: string) {
           }
         }
 
+        const visibleSkills = allSkills.filter((s) => !s.secret);
         const selected = await p.multiselect({
-          message: `Select skills to install (${allSkills.length} available):`,
-          options: allSkills
+          message: `Select skills to install (${visibleSkills.length} available):`,
+          options: visibleSkills
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((s) => ({
               value: s.name,

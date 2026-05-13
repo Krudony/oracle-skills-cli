@@ -31,6 +31,19 @@ bun ~/.claude/skills/recap/recap-rich.ts
 Script reads retro summaries, handoff content, tracks, git state. Then LLM adds:
 - **What's next?** (2-3 options based on context)
 
+### Step 1.5: Detect INCUBATED_BY (#229)
+
+The recap-rich.ts script auto-detects `.claude/INCUBATED_BY` breadcrumbs. If present, shows:
+
+```
+## ⚠️ INCUBATED REPO
+oracle: mawui-oracle
+date: 2026-04-13
+source: https://github.com/...
+```
+
+This tells the oracle: "You are in a repo tracked by another oracle. Check the breadcrumb for context."
+
 ### Step 2: Git context
 
 ```bash
@@ -59,7 +72,8 @@ Read those top 5 files. This recovers the same context `/compact` restores — h
 ### Step 4: Dig last session
 
 ```bash
-ENCODED_PWD=$(pwd | sed 's|^/|-|; s|/|-|g')
+ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
 PROJECT_BASE=$(ls -d "$HOME/.claude/projects/${ENCODED_PWD}" 2>/dev/null | head -1)
 export PROJECT_DIRS="$PROJECT_BASE"
 python3 ~/.claude/skills/dig/scripts/dig.py 1
@@ -206,7 +220,7 @@ Everything from `--now`, plus:
 The recap scripts (`recap.ts` and `recap-rich.ts`) auto-detect and display the current session:
 
 ```
-📡 Session: 74c32f34 | oracle-skills-cli | 2h 15m
+📡 Session: 74c32f34 | arra-oracle-skills-cli | 2h 15m
 ```
 
 Detection: scans `~/.claude/projects/[encoded-pwd]/*.jsonl` for the most recent session file, extracts short ID and elapsed time from first timestamp.

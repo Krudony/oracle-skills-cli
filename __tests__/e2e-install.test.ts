@@ -1,19 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
-import { readdir, readFile, rm, mkdir } from "fs/promises";
+import { readdir, readFile, rm, mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { tmpdir } from "os";
 import { agents } from "../src/cli/agents";
 import { installSkills, uninstallSkills, discoverSkills } from "../src/cli/installer";
-import { profiles } from "../src/profiles";
+import { profiles, labOnly, minimalOnly } from "../src/profiles";
 import type { AgentConfig } from "../src/cli/types";
 
-const TEST_DIR = join(tmpdir(), `oracle-skills-e2e-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `arra-oracle-skills-e2e-${Date.now()}`);
 const SKILLS_DIR = join(TEST_DIR, "skills");
 const COMMANDS_DIR = join(TEST_DIR, "commands");
 const TEST_AGENT = "test-e2e" as any;
 
-// Inject a test agent that points to our temp dirs
 const testAgentConfig: AgentConfig = {
   name: "test-e2e",
   displayName: "Test E2E",
@@ -32,18 +31,13 @@ beforeAll(async () => {
 
 afterAll(async () => {
   delete (agents as any)[TEST_AGENT];
-  if (existsSync(TEST_DIR)) {
-    await rm(TEST_DIR, { recursive: true });
-  }
+  if (existsSync(TEST_DIR)) await rm(TEST_DIR, { recursive: true });
 });
 
 async function listSkillDirs(dir: string): Promise<string[]> {
   if (!existsSync(dir)) return [];
   const entries = await readdir(dir, { withFileTypes: true });
-  return entries
-    .filter((d) => d.isDirectory() && !d.name.startsWith("."))
-    .map((d) => d.name)
-    .sort();
+  return entries.filter((d) => d.isDirectory() && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 
 async function listCommandFiles(dir: string): Promise<string[]> {
@@ -64,7 +58,6 @@ describe("e2e: install with standard profile", () => {
     const skills = await listSkillDirs(SKILLS_DIR);
     const standardSkills = profiles.standard.include!;
 
-    // Every standard skill should be installed
     for (const name of standardSkills) {
       expect(skills).toContain(name);
     }
@@ -79,7 +72,7 @@ describe("e2e: install with standard profile", () => {
       expect(existsSync(skillMd)).toBe(true);
 
       const content = await readFile(skillMd, "utf-8");
-      expect(content).toContain("installer: oracle-skills-cli");
+      expect(content).toContain("installer: arra-oracle-skills-cli");
     }
   });
 
@@ -92,17 +85,23 @@ describe("e2e: install with standard profile", () => {
     }
   });
 
-  it("command stubs exist for each skill", async () => {
+  it("command stubs exist for each non-hidden skill", async () => {
     const commands = await listCommandFiles(COMMANDS_DIR);
+    const allSkills = await discoverSkills();
+    const hiddenNames = new Set(allSkills.filter((s) => s.hidden).map((s) => s.name));
     const standardSkills = profiles.standard.include!;
 
     for (const name of standardSkills) {
-      expect(commands).toContain(`${name}.md`);
+      if (hiddenNames.has(name)) {
+        expect(commands).not.toContain(`${name}.md`);
+      } else {
+        expect(commands).toContain(`${name}.md`);
+      }
     }
   });
 
   it("manifest has correct structure", async () => {
-    const manifestPath = join(SKILLS_DIR, ".oracle-skills.json");
+    const manifestPath = join(SKILLS_DIR, ".arra-oracle-skills.json");
     expect(existsSync(manifestPath)).toBe(true);
 
     const manifest = JSON.parse(await readFile(manifestPath, "utf-8"));
@@ -128,59 +127,65 @@ describe("e2e: uninstall after standard", () => {
     expect(result.removed).toBe(profiles.standard.include!.length);
     expect(result.agents).toBe(1);
 
-    // No skill dirs remaining
     const skills = await listSkillDirs(SKILLS_DIR);
     expect(skills.length).toBe(0);
 
-    // No command files remaining
     const commands = await listCommandFiles(COMMANDS_DIR);
     expect(commands.length).toBe(0);
   });
 });
 
 describe("e2e: install full profile", () => {
-  it("installs all skills", async () => {
+  it("installs all stable skills (excludes lab-only)", async () => {
     const allSkills = await discoverSkills();
 
     await installSkills([TEST_AGENT], {
       global: true,
+      profile: "full",
       yes: true,
       commands: true,
     });
 
     const installed = await listSkillDirs(SKILLS_DIR);
-    expect(installed.length).toBe(allSkills.length);
+    const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie);
+    expect(installed.length).toBe(fullSkills.length);
   });
 
-  it("every discovered skill has a directory", async () => {
+  it("every full-profile skill has a directory", async () => {
     const allSkills = await discoverSkills();
     const installed = await listSkillDirs(SKILLS_DIR);
+    const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie);
 
-    for (const skill of allSkills) {
+    for (const skill of fullSkills) {
       expect(installed).toContain(skill.name);
     }
   });
 
-  it("command stubs match installed skills", async () => {
+  it("command stubs match installed non-hidden skills", async () => {
     const allSkills = await discoverSkills();
+    const installed = await listSkillDirs(SKILLS_DIR);
     const commands = await listCommandFiles(COMMANDS_DIR);
 
-    for (const skill of allSkills) {
-      expect(commands).toContain(`${skill.name}.md`);
+    for (const skill of allSkills.filter(s => installed.includes(s.name))) {
+      if (skill.hidden) {
+        expect(commands).not.toContain(`${skill.name}.md`);
+      } else {
+        expect(commands).toContain(`${skill.name}.md`);
+      }
     }
   });
 });
 
 describe("e2e: uninstall full", () => {
   it("removes everything cleanly", async () => {
-    const allSkills = await discoverSkills();
+    const installed = await listSkillDirs(SKILLS_DIR);
 
     const result = await uninstallSkills([TEST_AGENT], {
       global: true,
       yes: true,
     });
 
-    expect(result.removed).toBe(allSkills.length);
+    expect(result.removed).toBe(installed.length);
 
     const skills = await listSkillDirs(SKILLS_DIR);
     expect(skills.length).toBe(0);
@@ -190,9 +195,69 @@ describe("e2e: uninstall full", () => {
   });
 });
 
-describe("e2e: profile switch (standard → minimal)", () => {
-  it("installs standard then switches to minimal, removes extras", async () => {
-    // Install standard first
+describe("e2e: uninstall preserves external skills", () => {
+  it("skips skills without installer marker", async () => {
+    await installSkills([TEST_AGENT], {
+      global: true,
+      profile: "standard",
+      yes: true,
+    });
+
+    const externalDir = join(SKILLS_DIR, "external-skill");
+    await mkdir(externalDir, { recursive: true });
+    await writeFile(join(externalDir, "SKILL.md"), "# External Skill\n\nInstalled by another tool.");
+
+    const result = await uninstallSkills([TEST_AGENT], {
+      global: true,
+      yes: true,
+    });
+
+    expect(existsSync(externalDir)).toBe(true);
+    const remaining = await listSkillDirs(SKILLS_DIR);
+    expect(remaining).toEqual(["external-skill"]);
+
+    await rm(externalDir, { recursive: true });
+  });
+
+  it("removes explicitly named external skills with -s flag", async () => {
+    await installSkills([TEST_AGENT], {
+      global: true,
+      profile: "standard",
+      yes: true,
+    });
+
+    const externalDir = join(SKILLS_DIR, "my-custom-skill");
+    await mkdir(externalDir, { recursive: true });
+    await writeFile(join(externalDir, "SKILL.md"), "# Custom\n\nNo marker.");
+
+    await uninstallSkills([TEST_AGENT], {
+      global: true,
+      skills: ["my-custom-skill"],
+      yes: true,
+    });
+
+    expect(existsSync(externalDir)).toBe(false);
+    await uninstallSkills([TEST_AGENT], { global: true, yes: true });
+  });
+});
+
+describe("e2e: profile switch (full → standard) is additive", () => {
+  // #254 Bug 5: install is additive only. A second install with a smaller
+  // profile must not remove skills from the larger profile. Users remove
+  // explicitly via `uninstall`.
+  it("installs full then switches to standard, keeps extras", async () => {
+    await installSkills([TEST_AGENT], {
+      global: true,
+      profile: "full",
+      yes: true,
+      commands: true,
+    });
+
+    const allSkills = await discoverSkills();
+    const fullSkills = allSkills.filter(s => !labOnly.includes(s.name) && !minimalOnly.includes(s.name) && !s.secret && !s.zombie);
+    let skills = await listSkillDirs(SKILLS_DIR);
+    expect(skills.length).toBe(fullSkills.length);
+
     await installSkills([TEST_AGENT], {
       global: true,
       profile: "standard",
@@ -200,36 +265,20 @@ describe("e2e: profile switch (standard → minimal)", () => {
       commands: true,
     });
 
-    let skills = await listSkillDirs(SKILLS_DIR);
-    expect(skills.length).toBe(profiles.standard.include!.length);
-
-    // Switch to minimal
-    await installSkills([TEST_AGENT], {
-      global: true,
-      profile: "minimal",
-      yes: true,
-      commands: true,
-    });
-
     skills = await listSkillDirs(SKILLS_DIR);
-    const minimalSkills = profiles.minimal.include!;
+    const standardSkills = profiles.standard.include!;
 
-    expect(skills.length).toBe(minimalSkills.length);
-    for (const name of minimalSkills) {
+    // Additive: count unchanged, all full skills still present.
+    expect(skills.length).toBe(fullSkills.length);
+    for (const name of standardSkills) {
       expect(skills).toContain(name);
     }
-
-    // Standard-only skills should be gone
-    const standardOnly = profiles.standard.include!.filter(
-      (s) => !minimalSkills.includes(s)
-    );
-    for (const name of standardOnly) {
-      expect(skills).not.toContain(name);
+    for (const s of fullSkills) {
+      expect(skills).toContain(s.name);
     }
   });
 
   afterAll(async () => {
-    // Cleanup
     await uninstallSkills([TEST_AGENT], { global: true, yes: true });
   });
 });

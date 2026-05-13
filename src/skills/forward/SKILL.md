@@ -27,7 +27,8 @@ Create context for next session, then enter plan mode to define next steps.
 ### Session Detection
 
 ```bash
-ENCODED_PWD=$(pwd | sed 's|^/|-|; s|/|-|g')
+ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+ENCODED_PWD=$(echo "$ORACLE_ROOT" | sed 's|^/|-|; s|[/.]|-|g')
 PROJECT_DIR="$HOME/.claude/projects/${ENCODED_PWD}"
 LATEST_JSONL=$(ls -t "$PROJECT_DIR"/*.jsonl 2>/dev/null | head -1)
 if [ -n "$LATEST_JSONL" ]; then
@@ -46,7 +47,12 @@ Skip silently if detection fails.
 
 Resolve vault path first:
 ```bash
-PSI=$(readlink -f ψ 2>/dev/null || echo "ψ")
+ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -n "$ORACLE_ROOT" ] && [ -f "$ORACLE_ROOT/CLAUDE.md" ] && { [ -d "$ORACLE_ROOT/ψ" ] || [ -L "$ORACLE_ROOT/ψ" ]; }; then
+  PSI=$(readlink -f "$ORACLE_ROOT/ψ" 2>/dev/null || echo "$ORACLE_ROOT/ψ")
+else
+  PSI=$(readlink -f ψ 2>/dev/null || echo "ψ")
+fi
 ```
 
 Write to: `$PSI/inbox/handoff/YYYY-MM-DD_HH-MM_slug.md`
@@ -77,6 +83,101 @@ Do NOT `git add` vault files — they are shared state, not committed to repos.
 - [Important file 1]
 - [Important file 2]
 ```
+
+## Then: Create Issues from Pending Items
+
+After writing the handoff file, extract actionable items and offer to create GitHub issues.
+
+### Step 1: Extract Items
+
+From the handoff you just wrote, collect all `- [ ]` items from **Pending** and **Next Session** sections.
+
+### Step 2: Filter Actionable Items
+
+Skip items that are NOT actionable:
+- Items containing "monitor", "watch", "track", "deferred", "maybe", "consider"
+- Items that are vague (less than 4 words after the checkbox)
+
+### Step 3: Check for Duplicates
+
+```bash
+# For each item, check if an issue already exists with a similar title
+gh issue list --state open --search "ITEM_TITLE" --json title --jq '.[].title' 2>/dev/null
+```
+
+Skip items that already have a matching open issue (case-insensitive title match).
+
+### Step 4: Show and Confirm
+
+Display the list of new issues to create:
+
+```
+📋 Create GitHub issues from pending items?
+
+  1. Fix awaken git push auth
+  2. /rrr --deep time-based
+
+Create these 2 issues? [y/N]
+```
+
+**NEVER auto-create issues without user approval.**
+
+If user declines, skip issue creation and continue to plan mode.
+
+### Step 5: Create Issues
+
+If user approves:
+
+```bash
+# Detect repo for issue creation
+REMOTE=$(git remote get-url origin 2>/dev/null)
+# Extract owner/repo from remote URL
+REPO=$(echo "$REMOTE" | sed -E 's|.*[:/]([^/]+/[^/]+?)(\.git)?$|\1|')
+
+# For each actionable item:
+gh issue create --repo "$REPO" --title "ITEM_TITLE" --body "From /forward handoff on YYYY-MM-DD"
+```
+
+Show results:
+```
+Created #115: Fix awaken git push auth
+Created #116: /rrr --deep time-based
+```
+
+### Step 6: Write to Outbox
+
+Regardless of whether issues were created, write items to the outbox:
+
+```bash
+ORACLE_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -n "$ORACLE_ROOT" ] && [ -f "$ORACLE_ROOT/CLAUDE.md" ] && { [ -d "$ORACLE_ROOT/ψ" ] || [ -L "$ORACLE_ROOT/ψ" ]; }; then
+  PSI=$(readlink -f "$ORACLE_ROOT/ψ" 2>/dev/null || echo "$ORACLE_ROOT/ψ")
+else
+  PSI=$(readlink -f ψ 2>/dev/null || echo "ψ")
+fi
+OUTBOX_DIR="$PSI/outbox"
+mkdir -p "$OUTBOX_DIR"
+```
+
+Write to: `$PSI/outbox/YYYY-MM-DD_pending.md`
+
+```markdown
+# Pending Items — YYYY-MM-DD
+
+## From: [repo-name] /forward
+
+- [ ] Item 1 (issue #115)
+- [ ] Item 2 (issue #116)
+- [ ] Item 3 (no issue — skipped: vague)
+```
+
+### Silent Failures
+
+- If `gh` is not available: write to outbox only, skip issue creation silently
+- If repo has no GitHub remote: skip issue creation silently, write to outbox only
+- If `gh auth status` fails: skip issue creation silently, write to outbox only
+
+---
 
 ## Then: MUST Show Plan Approval Box
 

@@ -1,6 +1,6 @@
 ---
 name: learn
-description: Explore a codebase with parallel Haiku agents — clone, read, and document. Modes — --fast (1 agent), default (3), --deep (5). Use when user says "learn [repo]", "explore codebase", "study this repo", or shares a GitHub URL to study. Do NOT trigger for finding projects (use /trace), session mining (use /dig), or cloning for active development (use /project incubate).
+description: Explore a codebase with parallel Haiku agents — clone, read, and document. Modes — --fast (1 agent), default (3), --deep (5). Use when user says "learn [repo]", "explore codebase", "study this repo", or shares a GitHub URL to study. Do NOT trigger for finding projects (use /trace), session mining (use /dig), or cloning for active development (use /incubate).
 argument-hint: "<repo-url> [--fast | --deep]"
 ---
 
@@ -77,13 +77,9 @@ done < "$ROOT/ψ/learn/.origins"
 
 ## Step 0: Detect Input Type + Resolve Path
 
-```bash
-date "+🕐 %H:%M %Z (%A %d %B %Y)"
-```
-
 **CRITICAL: Capture ABSOLUTE paths first (before spawning any agents):**
 ```bash
-ROOT="$(pwd)"
+date "+🕐 %H:%M %Z (%A %d %B %Y)" && ROOT="$(pwd)"
 echo "Learning from: $ROOT"
 ```
 

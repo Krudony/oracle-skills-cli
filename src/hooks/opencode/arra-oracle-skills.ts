@@ -18,7 +18,7 @@ function getTimestamp(): string {
 }
 
 const OracleSkillsPlugin: Plugin = () => ({
-  name: "oracle-skills",
+  name: "arra-oracle-skills",
   
   "experimental.chat.messages.transform": (_input: any, output: any) => {
     if (output?.messages && Array.isArray(output.messages)) {
