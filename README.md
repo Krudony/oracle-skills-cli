@@ -6,25 +6,25 @@
 
 ```bash
 # Claude Code — standard profile (default)
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y --agent claude-code
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y --agent claude-code
 
 # Full profile (all skills)
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y -p full --agent claude-code
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y -p full --agent claude-code
 
 # Lab profile (full + experimental)
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y -p lab --agent claude-code
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y -p lab --agent claude-code
 
 # Specific skills only
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y -s recap rrr trace --agent claude-code
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y -s recap rrr trace --agent claude-code
 
 # Other agents (skills + commands)
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y --agent codex --with-commands
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y --agent opencode --with-commands
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y --agent cursor
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y --agent gemini-cli --with-commands
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y --agent codex --with-commands
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y --agent opencode --with-commands
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y --agent cursor
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y --agent gemini-cli --with-commands
 
 # Multiple agents
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y --agent claude-code codex opencode
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y --agent claude-code codex opencode
 ```
 
 18 agents: Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed
@@ -34,7 +34,7 @@ npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y --agent claude-code code
 <!-- skills:start -->
 
 <details>
-<summary>📚 <strong>62 skills installed</strong> — click to expand</summary>
+<summary>📚 <strong>49 skills installed</strong> — click to expand</summary>
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -126,7 +126,7 @@ about                   # version + status
 Secret skills are excluded from all profiles. Install by name:
 
 ```bash
-npx arra-oracle-skills@26.5.13-alpha.1626 install -g -y -s watch harden wormhole fleet release warp morpheus mailbox
+npx arra-oracle-skills@26.5.13-alpha.1726 install -g -y -s watch harden wormhole fleet release warp morpheus mailbox
 ```
 
 | Skill | What |
