@@ -1,9 +1,19 @@
 import { homedir } from 'os';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { execSync } from 'child_process';
 import type { AgentConfig, AgentType } from './types.js';
 
 const home = homedir();
+
+export function thClawsAvailable(): boolean {
+  try {
+    execSync('command -v thclaws', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export const agents: Record<AgentType, AgentConfig> = {
   opencode: {
@@ -146,10 +156,29 @@ export const agents: Record<AgentType, AgentConfig> = {
     globalSkillsDir: join(home, '.zed/skills'),
     detectInstalled: () => existsSync(join(home, '.zed')),
   },
+  thclaws: {
+    name: 'thclaws',
+    displayName: 'thClaws',
+    // Project-scoped install is intentionally out of scope for now — project
+    // owners make that decision manually. Only user-global path is supported.
+    // skillsDir is kept for the install path resolver but is never written to
+    // unless someone passes -g (which is the documented usage).
+    skillsDir: '.thclaws/skills',
+    globalSkillsDir: join(home, '.config/thclaws/skills'),
+    // Detect by binary presence rather than config-dir presence: thClaws may
+    // exist on PATH before the user has ever created ~/.config/thclaws.
+    detectInstalled: () => thClawsAvailable(),
+  },
 };
 
-/** Default agents to install to (unless --agent overrides) */
-export const defaultAgentNames = ['claude-code', 'codex'];
+/**
+ * Default agents to install to (unless --agent overrides).
+ *
+ * thclaws is included here so when the binary is detected it joins the
+ * auto-default set alongside claude-code + codex (federation request from
+ * thclaws@m5 — auto-detection, no explicit flag needed).
+ */
+export const defaultAgentNames = ['claude-code', 'codex', 'thclaws'];
 
 export function detectInstalledAgents(): string[] {
   return Object.entries(agents)
