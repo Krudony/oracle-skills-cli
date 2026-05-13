@@ -6,37 +6,7 @@ import type { AgentConfig, AgentType } from './types.js';
 
 const home = homedir();
 
-/**
- * Detect whether the `thclaws` binary is present on this system.
- *
- * thClaws is a Codex-family fork (Soul-Brews-Studio/thClaws) that ships a
- * chatgpt-codex provider hitting chatgpt.com/backend-api/codex directly.
- * When the binary is present we auto-enable the thClaws install target so
- * existing arra-oracle skills are discoverable by the chatgpt-codex agent.
- *
- * Checked locations (verified canonical paths per thclaws@m5 federation,
- * 2026-05-13, fork rev dc1f344 user-manual/ch02-installation.md):
- *   ~/.local/bin/thclaws         (★ official tarball release — most common)
- *   ~/.cargo/bin/thclaws         (cargo install)
- *   %LOCALAPPDATA%\Programs\thclaws\thclaws.exe  (Windows zip)
- *   `which thclaws` fallback     (any other PATH location)
- *
- * NOT checked: /usr/local/bin/thclaws or /opt/homebrew/bin/thclaws —
- * thClaws has no Homebrew formula (only `brew install ollama` is referenced
- * in install docs); /usr/local/bin is not a canonical install channel.
- */
 export function thClawsAvailable(): boolean {
-  const paths = [
-    join(home, '.local', 'bin', 'thclaws'),
-    join(home, '.cargo', 'bin', 'thclaws'),
-  ];
-  // Windows install location
-  if (process.env.LOCALAPPDATA) {
-    paths.push(join(process.env.LOCALAPPDATA, 'Programs', 'thclaws', 'thclaws.exe'));
-  }
-  if (paths.some((p) => existsSync(p))) return true;
-
-  // PATH fallback — catches any other canonical install (e.g. user-customized location).
   try {
     execSync('command -v thclaws', { stdio: 'ignore' });
     return true;
