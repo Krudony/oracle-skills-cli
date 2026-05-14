@@ -16,22 +16,21 @@
  * elsewhere they duplicate functionality of forward/recap/rrr. Excluded from full+lab.
  */
 
-/** Minimal profile — lite lifecycle + trace + update + upgrade (token-optimized) */
+/** Minimal profile — lite lifecycle + trace (token-optimized) */
 export const MINIMAL_SKILLS = [
-  'about-oracle', 'forward-lite', 'go', 'oracle-soul-sync-update', 'recap-lite', 'rrr-lite', 'trace',
+  'about-oracle', 'forward-lite', 'go', 'recap-lite', 'rrr-lite', 'trace',
 ] as const;
 
 /** Standard profile — daily driver skills (always installed) */
 export const STANDARD_SKILLS = [
   'awaken', 'bampenpien', 'bud', 'dig', 'forward', 'go',
-  'learn', 'recap', 'rrr', 'talk-to', 'team-agents', 'trace', 'xray',
+  'learn', 'recap', 'rrr', 'talk-to', 'team-agents', 'trace',
 ] as const;
 
 /** Lab-only skills — experimental, not in standard or full */
 export const LAB_SKILLS = [
-  'contacts', 'dream', 'feel', 'fleet', 'harden',
-  'i-believed', 'inbox', 'machines', 'mailbox', 'morpheus',
-  'release', 'schedule', 'vault', 'warp', 'watch', 'work-with', 'worktree', 'wormhole',
+  'contacts', 'dream', 'feel', 'fyi', 'hey', 'inbox', 'mailbox',
+  'schedule', 'watch', 'worktree', 'xray',
 ] as const;
 
 /** Minimal-only skills — token-optimized lite variants that replace the full
@@ -44,12 +43,44 @@ export const MINIMAL_ONLY_SKILLS = [
 
 /** Zombie skills — internal development candidates from arra-symbiosis-skills.
  *  Excluded from ALL profiles. Install by name only: `arra install -s workon`
- *  These are dormant — available for development, not for users. */
+ *  These are dormant — available for development, not for users.
+ *
+ *  Storage: each zombie lives under `src/skills/.archive/<name>/SKILL.md`
+ *  (moved out of the active skill listing for cognitive + visual cleanup).
+ *  The installer + VFS generator know to also scan `.archive/` so the `-s`
+ *  opt-in path keeps working unchanged. Nothing-is-Deleted preserved. */
 export const ZOMBIE_SKILLS = [
+  // Original 13 (from arra-symbiosis-skills)
   'alpha-feature', 'birth', 'deep-research', 'gemini', 'handover',
   'list-issues-pr-pulse', 'mine', 'new-issue', 'oracle-manage',
   'speak', 'what-we-done', 'whats-next', 'workon',
+  // 2026-05-13 cull (#327): 13 zombies based on usage audit (3,685 sessions).
+  // Kept active by explicit user request: bampenpien (standard), feel + morpheus (lab),
+  // fyi (lab, imported from oracle-proof-of-concept-skills), resonance (implicit-full).
+  'i-believed', 'work-with', 'morpheus',
+  'retrospective', 'skills-list',
+  'fleet', 'machines', 'warp', 'release',
+  'philosophy', 'wormhole', 'harden', 'vault',
+  // 2026-05-14 (#333 content correction): original simple /dream body
+  // preserved as zombie after /dream absorbed the evolved morpheus body.
+  'dream-original',
+  // 2026-05-14: replaced by /go update verb — no longer needs its own skill slot.
+  'oracle-soul-sync-update',
 ] as const;
+
+/** Return the source directory for a skill by name — `.archive/` for zombies,
+ *  plain `src/skills/<name>` for everything else. Pure-function helper used by
+ *  installer + VFS generator + any future tooling that needs to resolve a skill
+ *  source path. Falls back to the active path so callers can still test
+ *  existence via fs.existsSync. */
+export function skillDirFor(name: string, skillsRoot: string): string {
+  const isZombie = (ZOMBIE_SKILLS as readonly string[]).includes(name);
+  // Use string concatenation here to avoid a node:path import in this pure module.
+  const sep = skillsRoot.endsWith('/') ? '' : '/';
+  return isZombie
+    ? `${skillsRoot}${sep}.archive/${name}`
+    : `${skillsRoot}${sep}${name}`;
+}
 
 // Backwards-compatible aliases
 export const labOnly = [...LAB_SKILLS] as string[];

@@ -1,28 +1,83 @@
 import type { Command } from 'commander';
 import * as p from '@clack/prompts';
-import { agents, getDefaultAgents, getAgentNames } from '../agents.js';
-import { listSkills, installSkills } from '../installer.js';
-import { profiles } from '../../profiles.js';
+import { agents, getDefaultAgents, getAgentNames, detectInstalledAgents, thClawsAvailable } from '../agents.js';
+import { listSkills, installSkills, discoverSkills } from '../installer.js';
+import { profiles, resolveProfile } from '../../profiles.js';
 import type { ShellMode } from '../fs-utils.js';
+
+/**
+ * #337 — Preview the skills that would be installed, so the install prompt
+ * can show the list BEFORE asking the user to confirm. Mirrors (a subset of)
+ * the resolution logic in `installSkills`:
+ *   - explicit `-s <names>` without explicit `--profile`  →  just those names
+ *     (the installer is also additive with already-installed skills, but for
+ *     preview purposes we show what the user explicitly asked for).
+ *   - otherwise  →  profile-resolved set ∪ any `-s` extras.
+ * Secrets + zombies are filtered out the same way `resolveProfile` filters them.
+ */
+async function computePreviewSkillNames(
+  options: { profile?: string; skill?: string[] },
+  cmd: any,
+): Promise<string[]> {
+  const profileSource = cmd?.getOptionValueSource?.('profile') ?? 'default';
+  const profileExplicit = profileSource === 'cli';
+
+  const all = await discoverSkills();
+  const allNames = all.map((s) => s.name);
+  const secretNames = all.filter((s) => s.secret).map((s) => s.name);
+  const zombieNames = all.filter((s) => s.zombie).map((s) => s.name);
+
+  // -s without explicit --profile: additive mode — show the explicit picks.
+  if (options.skill && options.skill.length > 0 && !profileExplicit) {
+    return [...new Set(options.skill)];
+  }
+
+  const resolved = resolveProfile(
+    options.profile || 'minimal',
+    allNames,
+    secretNames,
+    zombieNames,
+  );
+  const profileSkills = resolved ?? allNames.filter(
+    (s) => !secretNames.includes(s) && !zombieNames.includes(s),
+  );
+  const extras = options.skill || [];
+  return [...new Set([...profileSkills, ...extras])];
+}
 
 export function registerInstall(program: Command, version: string) {
   program
     .command('install', { isDefault: true })
     .description('Install Oracle skills to agents')
     .option('-g, --global', 'Install to user directory instead of project')
+    // #331: -l is explicit-local symmetric to -g. No flag still defaults to local
+    // for back-compat. Conflict with -g caught below.
+    .option('-l, --local', 'Install to project .claude/skills/ (explicit form of the default)')
     .option('-a, --agent <agents...>', 'Target specific agents (e.g., claude-code, opencode)')
     .option('-s, --skill <skills...>', 'Install specific skills by name')
     .option('-p, --profile <name>', 'Install a skill profile (minimal, standard, full, lab)', 'minimal')
-    .option('-l, --list', 'List available skills without installing')
+    // #331: --list moved off -l to free it for --local. Long form only.
+    .option('--list', 'List available skills without installing')
     .option('-y, --yes', 'Skip confirmation prompts')
     .option('--with-commands', 'Also install command stubs to ~/.claude/commands/')
     .option('--force-global', 'Install global skills even if a same-named local skill exists (#230)')
+    // #330: federated agents are explicit opt-in. Old --no-thclaws semantics
+    // are inverted into --with-thclaws (thClaws is no longer auto-detected).
+    .option('--with-thclaws', 'Include thClaws if detected (federated agent — explicit opt-in)')
+    .option('--thclaws-only', 'Install ONLY to thClaws paths (skips Claude Code, Codex, OpenCode, etc.)')
+    .option('--all-detected', 'Install to ALL detected agents incl. federated (CI escape hatch)')
     .option('--shell', 'Force Bun.$ shell commands (use on Windows to test shell compatibility)')
     .option('--no-shell', 'Force Node.js fs operations (use on Unix if Bun.$ causes issues)')
     .action(async (options, cmd) => {
       p.intro(`🔮 Oracle Skills Installer v${version}`);
 
       try {
+        // #331: -g + -l is a contradiction; fail fast with a clear message.
+        if (options.global && options.local) {
+          p.log.error('Cannot pass both --global (-g) and --local (-l) — pick one or omit both (default is local).');
+          process.exit(1);
+        }
+
         if (options.list) {
           await listSkills();
           p.outro('Use --skill <name> to install specific skills');
@@ -31,15 +86,42 @@ export function registerInstall(program: Command, version: string) {
 
         let targetAgents: string[] = options.agent || [];
 
-        if (targetAgents.length === 0) {
-          const detected = getDefaultAgents();
+        // --thclaws-only short-circuits everything: write ONLY to thClaws.
+        // Useful for testing the thClaws path in isolation.
+        if (options.thclawsOnly) {
+          targetAgents = ['thclaws'];
+        } else if (targetAgents.length === 0) {
+          // #330: build the auto-detect set with explicit opt-ins layered on.
+          // Base = getDefaultAgents() now filters federated out by default.
+          let detected: string[];
+          if (options.allDetected) {
+            // Escape hatch: ALL detected including federated.
+            detected = detectInstalledAgents();
+          } else {
+            detected = getDefaultAgents();
+            // --with-thclaws: add thclaws to the auto set if binary is present.
+            if (options.withThclaws && thClawsAvailable() && !detected.includes('thclaws')) {
+              detected = [...detected, 'thclaws'];
+            }
+          }
 
           if (detected.length > 0) {
             p.log.info(`Detected agents: ${detected.map((a) => agents[a as keyof typeof agents]?.displayName).join(', ')}`);
 
             if (!options.yes) {
+              // #337: show the skill list BEFORE asking to confirm — users
+              // shouldn't have to consent without knowing what's coming.
+              const previewSkills = await computePreviewSkillNames(options, cmd);
+              if (previewSkills.length > 0) {
+                const head = previewSkills.slice(0, 5).map((s) => `/${s}`).join(', ');
+                const more = previewSkills.length > 5 ? ` (+${previewSkills.length - 5} more)` : '';
+                p.log.info(`Skills to install (${previewSkills.length}): ${head}${more}`);
+              }
+
               const useDetected = await p.confirm({
-                message: 'Install to detected agents?',
+                message: previewSkills.length > 0
+                  ? `Install ${previewSkills.length} skills to detected agents?`
+                  : 'Install to detected agents?',
               });
 
               if (p.isCancel(useDetected)) {
@@ -83,6 +165,39 @@ export function registerInstall(program: Command, version: string) {
           return;
         }
 
+        // Target-display: show user which targets are active vs skipped.
+        // #330: thclaws is now opt-in. Make the skip-reason clearer for federated.
+        const allDefault = ['claude-code', 'codex', 'thclaws'] as const;
+        const reportLines: string[] = [`Installing skills to detected targets:`];
+        for (const name of allDefault) {
+          const agent = agents[name as keyof typeof agents];
+          if (!agent) continue;
+          const dir = options.global ? agent.globalSkillsDir : agent.skillsDir;
+          if (targetAgents.includes(name)) {
+            reportLines.push(`  ✓ ${agent.displayName.padEnd(12)} (${dir})`);
+          } else {
+            // Explain why it was skipped
+            let reason = 'not selected';
+            if (name === 'thclaws') {
+              if (!thClawsAvailable()) reason = 'no binary detected — skipping';
+              else if (!options.withThclaws && !options.allDetected) reason = 'federated — pass --with-thclaws or -a thclaws';
+              else reason = 'skipped';
+            } else if (!agent.detectInstalled()) {
+              reason = 'no install detected — skipping';
+            }
+            reportLines.push(`  ✗ ${agent.displayName.padEnd(12)} (${reason})`);
+          }
+        }
+        // Also list any non-default targets that were explicitly chosen
+        for (const name of targetAgents) {
+          if ((allDefault as readonly string[]).includes(name)) continue;
+          const agent = agents[name as keyof typeof agents];
+          if (!agent) continue;
+          const dir = options.global ? agent.globalSkillsDir : agent.skillsDir;
+          reportLines.push(`  ✓ ${agent.displayName.padEnd(12)} (${dir})`);
+        }
+        p.log.info(reportLines.join('\n'));
+
         const shellMode: ShellMode = options.shell ? 'shell'
           : options.noShell ? 'no-shell'
           : 'auto';
@@ -107,6 +222,9 @@ export function registerInstall(program: Command, version: string) {
           commands: options.withCommands,
           forceGlobal: options.forceGlobal,
           shellMode,
+          thclawsOnly: !!options.thclawsOnly,
+          withThclaws: !!options.withThclaws,
+          allDetected: !!options.allDetected,
         });
 
         p.outro('✨ Oracle skills installed!');

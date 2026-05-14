@@ -7,27 +7,27 @@ const ALL_SKILLS = [
   ...LAB_SKILLS,
   ...ZOMBIE_SKILLS,
   ...MINIMAL_ONLY_SKILLS,
-  // Full/other skills (not standard, not lab-only, not minimal-only)
-  "about-oracle", "auto-retrospective", "create-shortcut", "incubate",
-  "oracle-family-scan", "oracle-soul-sync-update", "philosophy", "project",
-  "resonance", "skills-list", "standup", "where-we-are", "who-are-you",
+  // Full/other skills (not standard, not lab-only, not minimal-only, not zombie)
+  "about-oracle", "create-shortcut", "incubate",
+  "oracle-family-scan", "project",
+  "standup", "where-we-are", "who-are-you",
 ].sort();
 
 const ZOMBIE_LIST = [...ZOMBIE_SKILLS] as string[];
 
 describe("profiles", () => {
-  it("minimal has 7 skills", () => {
-    expect(MINIMAL_SKILLS).toHaveLength(7);
-    expect(profiles.minimal.include).toHaveLength(7);
+  it("minimal has 6 skills", () => {
+    expect(MINIMAL_SKILLS).toHaveLength(6);
+    expect(profiles.minimal.include).toHaveLength(6);
   });
 
   it("minimal includes go for upgrade path", () => {
     expect(MINIMAL_SKILLS).toContain("go");
   });
 
-  it("standard has 13 skills", () => {
-    expect(STANDARD_SKILLS).toHaveLength(13);
-    expect(profiles.standard.include).toHaveLength(13);
+  it("standard has 12 skills", () => {
+    expect(STANDARD_SKILLS).toHaveLength(12);
+    expect(profiles.standard.include).toHaveLength(12);
   });
 
   it("full excludes lab-only AND minimal-only skills (post-#285)", () => {
@@ -52,12 +52,12 @@ describe("profiles", () => {
     expect([...STANDARD_SKILLS]).not.toContain("feel");
   });
 
-  it("LAB_SKILLS has 18 experimental skills", () => {
-    expect(LAB_SKILLS).toHaveLength(18);
+  it("LAB_SKILLS has 11 experimental skills (9 post-#327 + xray from standard + hey new)", () => {
+    expect(LAB_SKILLS).toHaveLength(11);
   });
 
-  it("ZOMBIE_SKILLS has 13 internal development candidates", () => {
-    expect(ZOMBIE_SKILLS).toHaveLength(13);
+  it("ZOMBIE_SKILLS has 28 archived candidates (27 prior + oracle-soul-sync-update replaced by /go update)", () => {
+    expect(ZOMBIE_SKILLS).toHaveLength(28);
   });
 
   it("labOnly matches LAB_SKILLS", () => {
@@ -117,12 +117,12 @@ describe("profiles", () => {
 describe("resolveProfile", () => {
   it("minimal returns 6 skills", () => {
     const result = resolveProfile("minimal", ALL_SKILLS);
-    expect(result).toHaveLength(7);
+    expect(result).toHaveLength(6);
   });
 
-  it("standard returns 13 skills", () => {
+  it("standard returns 12 skills", () => {
     const result = resolveProfile("standard", ALL_SKILLS);
-    expect(result).toHaveLength(13);
+    expect(result).toHaveLength(12);
   });
 
   it("full returns all minus lab-only, minimal-only, and zombies", () => {

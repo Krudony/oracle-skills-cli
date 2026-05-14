@@ -1,7 +1,7 @@
 ---
 name: go
-description: Switch skill profiles (standard/full/lab), fresh install, or enable/disable specific skills via arra-oracle-skills CLI. Destructive — modifies globally installed skills.
-argument-hint: "<standard|full|lab|cleanup> | enable|disable <skill...>"
+description: Manage Oracle skills — list, install, remove, find, switch profiles, update. Use when user says "go", "install skill", "remove skill", "find skill", "switch profile", "go list", "go update", "go install", "go find". Single entry point for all skill management.
+argument-hint: "[list] | <standard|full|lab|cleanup|update> | install|remove|find <skill...>"
 disable-model-invocation: true
 ---
 
@@ -12,14 +12,17 @@ disable-model-invocation: true
 ## Usage
 
 ```
-/go                     # show installed skills
+/go                     # all skills — profile tier + installed status
+/go list                # same as /go (no args)
 /go minimal             # newcomer essentials (7 skills, default)
 /go standard            # daily driver (13 skills)
 /go full                # all stable (excludes lab-only experiments)
 /go lab                 # everything including experimental
 /go cleanup             # remove ALL skills → fetch latest → fresh install
-/go enable trace dig    # enable specific skills
-/go disable watch       # disable specific skills
+/go update              # check for new version + upgrade in-place
+/go install team-agents # cherry-pick install specific skills
+/go remove watch        # uninstall specific skills
+/go find feel           # search all available skills by name
 ```
 
 > ⚠ NEW (#285): `/go <profile>` now ALIGNS your installed skills to the target profile.
@@ -53,11 +56,133 @@ Use `$ARRA` for all commands below.
 
 Parse the user's `/go` arguments and run the matching `$ARRA` command.
 
-### `/go` (no args) — show current state
+### `/go` or `/go list` — show all skills with profile + installed status + type
+
+Write this script to `/tmp/go-list.sh` and run it with `bash /tmp/go-list.sh`. The script auto-discovers profile membership from the CLI — zero hardcoded skill names.
 
 ```bash
-$ARRA list -g
+#!/bin/bash
+SKILLS_DIR="$HOME/.claude/skills"
+ARRA="$HOME/.bun/bin/arra-oracle-skills"
+VERSION=$($ARRA --version 2>/dev/null || echo "?")
+
+# Auto-get skill lists from CLI (no hardcoding)
+get_profile_skills() {
+  $ARRA profiles "$1" 2>/dev/null | grep "Skills:" | sed 's/.*Skills: //' | tr ',' '\n' | sed 's/^ *//' | tr '\n' ' '
+}
+
+STANDARD=$(get_profile_skills standard)
+FULL=$(get_profile_skills full)
+LAB_RAW=$(get_profile_skills lab)
+
+# Lab-only = in lab but not in full
+LAB=""
+for s in $LAB_RAW; do
+  echo " $FULL " | grep -q " $s " || LAB="$LAB $s"
+done
+
+# Minimal-only = in minimal but not in standard
+MINIMAL=$(get_profile_skills minimal)
+MINIMAL_ONLY=""
+for s in $MINIMAL; do
+  echo " $STANDARD " | grep -q " $s " || MINIMAL_ONLY="$MINIMAL_ONLY $s"
+done
+
+ALL_ARRA="$STANDARD $LAB $MINIMAL_ONLY"
+
+detect_type() {
+  local dir="$SKILLS_DIR/$1"
+  [ -d "$dir" ] || return
+  local has_code=false has_agent=false
+  [ -d "$dir/scripts" ] && has_code=true
+  grep -qlE 'Agent\(|subagent|TeamCreate|SendMessage' "$dir/SKILL.md" 2>/dev/null && has_agent=true
+  if $has_code && $has_agent; then echo "[code+agent]"
+  elif $has_code; then echo "[code]"
+  elif $has_agent; then echo "[agent]"
+  fi
+}
+
+get_desc() {
+  local f="$SKILLS_DIR/$1/SKILL.md"
+  [ -f "$f" ] || return
+  awk '/^---$/{n++; next} n==1{print} n>=2{exit}' "$f" \
+    | grep -E '^description:' | head -1 \
+    | sed "s/description: *//; s/['\"]//g; s/\[core\].*G-SKLL | //" \
+    | cut -c1-40
+}
+
+echo "Oracle Skills v$VERSION"
+echo ""
+
+NUM=0; INSTALLED=0
+std_count=$(echo $STANDARD | wc -w | tr -d ' ')
+lab_count=$(echo $LAB | wc -w | tr -d ' ')
+min_count=$(echo $MINIMAL_ONLY | wc -w | tr -d ' ')
+
+for tier in STANDARD LAB MINIMAL_ONLY; do
+  case $tier in
+    STANDARD) skills="$STANDARD"; label="standard"; count=$std_count ;;
+    LAB) skills="$LAB"; label="lab"; count=$lab_count ;;
+    MINIMAL_ONLY) skills="$MINIMAL_ONLY"; label="minimal-only"; count=$min_count ;;
+  esac
+  [ -z "$(echo $skills | tr -d ' ')" ] && continue
+  printf " ─── %s (%s) " "$label" "$count"
+  printf '─%.0s' $(seq 1 $((52 - ${#label}))); echo ""
+  for name in $skills; do
+    NUM=$((NUM+1))
+    if [ -d "$SKILLS_DIR/$name" ]; then
+      mark="✓"; INSTALLED=$((INSTALLED+1))
+    else
+      mark="✗"
+    fi
+    tag=$(detect_type "$name")
+    desc=$(get_desc "$name")
+    if [ -n "$desc" ]; then
+      printf " %2d  %s  %-24s %-14s %s\n" "$NUM" "$mark" "$name" "$tag" "$desc"
+    else
+      printf " %2d  %s  %-24s %s\n" "$NUM" "$mark" "$name" "$tag"
+    fi
+  done
+  echo ""
+done
+
+# External (non-arra) skills
+EXT=0; EXT_NAMES=""
+for dir in "$SKILLS_DIR"/*/; do
+  [ -d "$dir" ] || continue
+  name=$(basename "$dir"); [ "$name" = ".trash" ] && continue
+  is_arra=false
+  for a in $ALL_ARRA; do [ "$name" = "$a" ] && is_arra=true && break; done
+  [ "$is_arra" = "false" ] && { EXT=$((EXT+1)); EXT_NAMES="$EXT_NAMES $name"; }
+done
+if [ "$EXT" -gt 0 ]; then
+  printf " ─── external (%d) " "$EXT"
+  printf '─%.0s' $(seq 1 44); echo ""
+  for name in $EXT_NAMES; do
+    NUM=$((NUM+1)); INSTALLED=$((INSTALLED+1))
+    tag=$(detect_type "$name")
+    desc=$(get_desc "$name")
+    if [ -n "$desc" ]; then
+      printf " %2d  ✓  %-24s %-14s %s\n" "$NUM" "$name" "$tag" "$desc"
+    else
+      printf " %2d  ✓  %-24s %s\n" "$NUM" "$name" "$tag"
+    fi
+  done
+  echo ""
+fi
+
+echo " $INSTALLED/$NUM installed  ·  zombies hidden (--zombies to show)"
+echo " Cherry-pick:  arra-oracle-skills install -g -s <name> -y"
+echo " Switch:       /go standard | /go lab"
 ```
+
+**Auto-detected columns:**
+- **Profile tier**: from `arra-oracle-skills profiles <name>` CLI output (zero hardcoded names)
+- **Type tags**: runtime detection from installed SKILL.md — `[code]` (scripts/), `[agent]` (Agent patterns), `[code+agent]` (both)
+- **Description**: parsed from installed SKILL.md frontmatter, truncated to 40 chars
+- **Installed**: checks `$HOME/.claude/skills/<name>/` exists
+
+**`--zombies` flag**: append zombie skills section. Only shown when explicitly requested.
 
 ### `/go <profile>` — switch profile
 
@@ -130,8 +255,7 @@ Build the combined table. For each of the 29 arra skills, show: profile tier, in
   #  Skill                    Profile    Installed  Version   Status       Usage
   ── ──────────────────────── ────────── ────────── ───────── ──────────── ─────
   1  about-oracle             standard   ✓          v3.7.2    ✓ ok         2
-  2  auto-retrospective       full       ✓          v3.7.2    ✓ ok         2
-  3  awaken                   standard   ✓          v3.7.2    ✓ ok         7
+  2  awaken                   standard   ✓          v3.7.2    ✓ ok         7
   4  contacts                 lab        ✓          v3.7.2    ✓ ok         5
   5  create-shortcut          lab        ✗          —         —            3
   6  dig                      standard   ✓          v3.7.2    ✓ ok         6
@@ -168,7 +292,7 @@ Build the combined table. For each of the 29 arra skills, show: profile tier, in
 **How to get usage counts**: for each skill, count sessions containing `/$skill`:
 
 ```bash
-for skill in about-oracle auto-retrospective awaken contacts create-shortcut \
+for skill in about-oracle awaken contacts create-shortcut \
   dig dream feel forward go inbox incubate learn oracle-family-scan \
   oracle-soul-sync-update philosophy project recap resonance rrr \
   schedule standup talk-to team-agents trace vault where-we-are who-are-you xray; do
@@ -222,21 +346,57 @@ LATEST=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/arra-oracle-skil
 - Version mismatch (some v3.6.1, some v3.7.0)
 - Want a clean slate without losing personal skills
 
-### `/go enable <skill...>` — enable specific skills
+### `/go update` — check for new version + upgrade in-place
+
+```bash
+CURRENT=$($ARRA --version 2>/dev/null || echo "unknown")
+LATEST=$(curl -s https://api.github.com/repos/Soul-Brews-Studio/arra-oracle-skills-cli/tags | grep -m1 '"name"' | cut -d'"' -f4)
+echo "  Installed: $CURRENT"
+echo "  Latest:    $LATEST"
+```
+
+If versions differ:
+
+```bash
+$ARRA install -g -y
+```
+
+If already current: "Already on latest ($CURRENT). Nothing to do."
+
+- `/go update` → check + upgrade to latest tag
+- Equivalent to `/oracle-soul-sync-update` but discoverable under `/go`
+- Does NOT change your profile — only bumps the version of currently installed skills
+- Safe to run anytime — idempotent
+
+### `/go install <skill...>` — cherry-pick specific skills
 
 ```bash
 $ARRA install -g -s <skill...> -y
 ```
 
-- `/go enable trace dig` → `$ARRA install -g -s trace dig -y`
+- `/go install team-agents` → `$ARRA install -g -s team-agents -y`
+- `/go install dig hey xray` → `$ARRA install -g -s dig hey xray -y`
 
-### `/go disable <skill...>` — disable specific skills
+Works for ANY skill — standard, lab, or even zombie. Does not change your profile; just adds the named skills on top of whatever you have.
+
+### `/go remove <skill...>` — uninstall specific skills
 
 ```bash
 $ARRA uninstall -g -s <skill...> -y
 ```
 
-- `/go disable watch` → `$ARRA uninstall -g -s watch -y`
+- `/go remove watch` → `$ARRA uninstall -g -s watch -y`
+
+### `/go find <query>` — search available skills
+
+```bash
+$ARRA profiles lab 2>/dev/null
+```
+
+Show all skills from the lab profile (the superset) and highlight any matching the query. If the user says `/go find feel`, search the profile output for "feel" and show where it lives (which tier, installed or not).
+
+- `/go find feel` → show feel is in lab tier, not installed, description
+- `/go find team` → show team-agents in standard tier, installed
 
 ---
 

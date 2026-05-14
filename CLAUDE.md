@@ -103,30 +103,34 @@ Skills with `hooks/hooks.json` are installed as Claude Code plugins:
 
 Currently `ralph-loop-soulbrews` has hooks.
 
-## Branch Strategy
+## Branch Strategy — **always alpha, never main**
 
-**NEVER push directly to main.** Always use branches:
+**Every PR targets `alpha`. No exceptions for bug fixes or features.** `main` is reserved for stable cuts that happen as alpha → main release PRs (and only those).
 
-| Work Type | Branch | Merge |
-|-----------|--------|-------|
-| Alpha features | `alpha` | PR → main when stable |
-| Bug fixes | `fix/name` | PR → alpha or main |
-| Features | `feat/name` | PR → alpha |
+| Work Type | Branch | PR base |
+|-----------|--------|---------|
+| Anything (feature, fix, refactor, docs) | `feat/*` or `fix/*` | **always `--base alpha`** |
+| Stable cut | `alpha` | `--base main` (rare, deliberate, by /release-alpha or similar) |
+
+`gh pr create` defaults to the repo's default branch (`main`) — that default is the bug. You MUST pass `--base alpha` explicitly:
+
+```bash
+gh pr create --base alpha --head feat/my-thing --title "..."
+```
+
+A PreToolUse safety hook at `~/.claude/hooks/safety-pr-base.sh` blocks any `gh pr create` against this repo that targets `main` or omits `--base`. If the hook fires, fix the flag — don't bypass it.
 
 ```bash
 # Alpha work (default)
 git checkout alpha
-# ... work, commit, push ...
-# Tag alpha releases from alpha branch
-git tag v3.3.0-alpha.N
+# ... work, commit, push, PR → alpha ...
 
-# Stable release
-gh pr create --base main --head alpha
-# Merge PR → tag stable
+# Stable release (rare)
+gh pr create --base main --head alpha --title "release: vYY.M.D"
 ```
 
 **`/alpha-feature`** commits to `alpha` branch.
-**`/release-alpha`** tags from `alpha` branch.
+**`/release-alpha`** tags from `alpha` branch (and only it should ever target main).
 
 ## Version Workflow
 

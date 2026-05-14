@@ -89,9 +89,9 @@ Write immediately, no prompts. Include:
 - Session Summary
 - Timeline
 - Files Modified
-- AI Diary (150+ words, first-person)
-- Honest Feedback (100+ words, 3 friction points)
-- Lessons Learned
+- AI Diary (150+ words, first-person; must contain one line labeled `[→ AGENT DECISION]` naming a choice YOU made wrong — overconfidence, repeated wrong proposal, misread requirement; tool failures and env issues belong in friction, not here)
+- Honest Feedback (100+ words, 3 friction points; **session-specific only** — what dragged in THIS session; if something generalizes beyond this session, it belongs in Lessons, not here)
+- Lessons Learned (**generalizable only** — state each as a rule you'd tell another Oracle on a different project; if it only applies to this session's specific context, it's friction, not a lesson)
 - Next Steps
 
 ### 3. Write Lesson Learned
@@ -109,8 +109,8 @@ If the file doesn't exist, create with this header:
 
 Rule (parent CLAUDE.md §"Self-Evaluation Loop"): same friction 3 sessions → fix root cause, not another workaround.
 
-| when | session | done | stuck | win | friction |
-|---|---|---|---|---|---|
+| when | session | done | stuck | win | friction | error |
+|---|---|---|---|---|---|---|
 ```
 
 Then append ONE row:
@@ -122,13 +122,14 @@ Then append ONE row:
 | `done` | tasks/items completed this session (comma-separated, terse) |
 | `stuck` | items blocked, deferred, or dropped — or `n/a` |
 | `win` | biggest unlock or ship this session (one line) |
-| `friction` | biggest drag, wall, or recurring pain (one line) |
+| `friction` | operational drag: env issue, tool failure, process slowdown — session-specific (one line, or `n/a`) |
+| `error` | agent decision error: wrong call YOU made — overconfidence, premature action, misread scope (one line, or `n/a`) |
 
 **Rule**: never skip. Trivial session? Still append with `trivial` in win/friction. Gaps break the pattern-detection value of the file.
 
 ### 4. Oracle Sync (two-layer pattern)
 
-1. Write to `ψ/memory/learnings/YYYY-MM-DD_<slug>.md` with frontmatter:
+1. Write to `$PSI/memory/learnings/YYYY-MM-DD_<slug>.md` with frontmatter:
    ```yaml
    ---
    pattern: <lesson learned in one line>
@@ -141,13 +142,13 @@ Then append ONE row:
    <body>
    ```
 
-2. The Oracle's auto-memory layer picks up new files in `ψ/memory/learnings/` automatically — no separate API call needed.
+2. The Oracle's auto-memory layer picks up new files in `$PSI/memory/learnings/` automatically — no separate API call needed.
 
 ### 4.5. Pattern Check (last 7 rows)
 
 Read the last 7 rows (or all rows if fewer) of `$PSI/memory/learnings/session-metrics.md`.
 
-Count keyword themes in the `friction` column. If any theme appears **≥3 times** in the window, append this section to the retrospective:
+Count keyword themes in the `friction` column (operational — escalation: file issue) and the `error` column (decision — escalation: raise in standup) independently. If any theme reaches **≥3 times** in either column, append the recurring-pattern section, naming which column triggered and the appropriate escalation.
 
 ```markdown
 ## 🔁 Recurring Pattern Detected
@@ -166,6 +167,20 @@ If no theme reaches ≥3 → skip this section silently.
 Retro files are written to vault (wherever `ψ` symlink resolves).
 
 **Do NOT `git add ψ/`** — it may be a symlink to the vault. Vault files are shared state, not committed to repos.
+
+### 6. Confirm (announce-mode — absolute paths required)
+
+# announce-mode → absolute path (no ψ/, no ~/, no $VAR, no ...).
+# Use:  echo "marker: $RESOLVED_PATH"  — bash substitutes. See CONVENTIONS.md.
+
+```bash
+RETRO_FILE="$PSI/memory/retrospectives/$(date +%Y-%m/%d)/$(date +%H.%M)_${SLUG}.md"
+LESSON_FILE="$PSI/memory/learnings/$(date +%Y-%m-%d)_${SLUG}.md"
+METRICS_FILE="$PSI/memory/learnings/session-metrics.md"
+echo "📝 Retrospective:  $RETRO_FILE"
+echo "💡 Lesson learned: $LESSON_FILE"
+echo "📊 Metrics row:    $METRICS_FILE"
+```
 
 ---
 
@@ -294,18 +309,21 @@ Stop and re-examine if your retrospective contains:
 - **Scope creep excuses**: "I also refactored X" — was that in scope? Did you choose it over the actual task?
 - **Missing evidence**: Claims without git hashes, file paths, or concrete output.
 
-### Verification Checklist
+### Verification Checklist + Required Audit Block
 
-Before saving the retrospective, verify:
+Before saving, run each check and **append this block verbatim (filled in) as the final section of the retro file**:
 
+```markdown
+## 🔍 Self-Audit
+- shipped: <N items — list commit hash or file path for each, or "none shipped">
+- blocked: <N items — list specific error/reason for each, or "none blocked">
+- uncomfortable truth: [→ AGENT DECISION] <one line — name the choice you made wrong>
+- friction: <N points> (operational: <list> | strategic: <list>)
+- next steps: <N — confirm each is actionable without a follow-up question>
+- rationalizations caught: <N — name them, or "none">
 ```
-[ ] Every "shipped" item has a commit hash or file path
-[ ] Every "blocked" item has a specific error or reason
-[ ] AI Diary contains at least ONE uncomfortable truth
-[ ] Honest Feedback has 3+ friction points (not softball ones)
-[ ] "Next Steps" are specific enough to start immediately
-[ ] No excuse from the table above appears unexamined
-```
+
+Do not fill with "✓" or "done". Write the actual values. The eval scans this block.
 
 **If you catch yourself rationalizing: name it.** Write "I noticed I was rationalizing about X because Y" in the AI Diary. Catching the pattern is more valuable than hiding it.
 

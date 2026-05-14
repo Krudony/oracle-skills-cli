@@ -1,37 +1,70 @@
 # arra-oracle-skills-cli
 
-62 skills for AI coding agents. Give your AI persistent memory, session awareness, and collaborative tools.
+36 skills for AI coding agents. Give your AI persistent memory, session awareness, and collaborative tools.
 
 ## Install
 
 ```bash
 # Claude Code — standard profile (default)
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent claude-code
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y --agent claude-code
 
 # Full profile (all skills)
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y -p full --agent claude-code
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y -p full --agent claude-code
 
 # Lab profile (full + experimental)
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y -p lab --agent claude-code
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y -p lab --agent claude-code
 
 # Specific skills only
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y -s recap rrr trace --agent claude-code
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y -s recap rrr trace --agent claude-code
 
 # Other agents (skills + commands)
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent codex --with-commands
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent opencode --with-commands
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent cursor
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent gemini-cli --with-commands
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y --agent codex --with-commands
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y --agent opencode --with-commands
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y --agent cursor
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y --agent gemini-cli --with-commands
 
 # Multiple agents
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent claude-code codex opencode
+npx arra-oracle-skills@26.5.14-alpha.1138 install -g -y --agent claude-code codex opencode
+
+# thClaws (federated agent — explicit opt-in)
+bunx arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli install -y -g --with-thclaws
+# OR target thclaws directly:
+bunx arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli install -y -g -a thclaws
+# Skills install to ~/.config/thclaws/skills/ when --with-thclaws is passed
+
+# Install to ALL detected agents incl. federated (CI escape hatch)
+bunx arra-oracle-skills@github:Soul-Brews-Studio/arra-oracle-skills-cli install -y -g --all-detected
 ```
 
-18 agents: Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed
+> **#330 note**: as of v26.5.14+, federated agents (thClaws, OpenCode, GitHub Copilot, OpenClaw) are NOT auto-installed by default — they require explicit `-a <name>`, `--with-<name>`, or `--all-detected`. Host Anthropic agents (Claude Code, Codex) continue to auto-detect.
+
+### Local project install
+
+By default (no `-g` flag), skills install to the current project's `.claude/skills/` instead of `~/.claude/skills/`:
+
+```bash
+# Local install (current project)
+npx arra-oracle-skills@26.5.14-alpha.1138 install -a claude-code -s trace -y
+
+# Same with explicit -l flag (symmetric to -g)
+npx arra-oracle-skills@26.5.14-alpha.1138 install -l -a claude-code -s trace -y
+```
+
+Use when:
+- Testing skill changes before global rollout
+- Different repos want different skill versions
+- Committing project-specific skills to `.claude/skills/` in version control
+
+The `L-SKLL` marker in the SKILL.md description distinguishes locally-installed skills from globally-installed ones (which get `G-SKLL`).
+
+19 agents: Claude Code, Codex, OpenCode, Cursor, Gemini CLI, Amp, Kilo Code, Roo Code, Goose, Antigravity, GitHub Copilot, OpenClaw, Droid, Windsurf, Cline, Aider, Continue, Zed, thClaws
 
 ## Skills
 
 <!-- skills:start -->
+
+<details>
+<summary>📚 <strong>36 skills installed</strong> — click to expand</summary>
 
 | # | Skill | Type | Description |
 |---|-------|------|-------------|
@@ -44,61 +77,37 @@ npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent claude-code code
 | 6 | **recap** | skill + code | Session orientation and awareness |
 | 7 | **schedule** | skill + code | Query schedule via Oracle API (Drizzle DB) |
 | - |  |  |  |
-| 8 | **alpha-feature** | skill | 'Full skill development pipeline |
-| 9 | **auto-retrospective** | skill | Configure auto-rrr |
-| 10 | **awaken** | skill | "Guided Oracle birth and awakening ritual |
-| 11 | **bampenpien** | skill | "บำเพ็ญเพียร |
-| 12 | **birth** | skill | 'Prepare Oracle birth props for a new repo |
-| 13 | **bud** | skill | 'Create a new oracle via maw bud |
-| 14 | **calver** | skill | Show or bump CalVer version |
-| 15 | **contacts** | skill | Manage Oracle contacts |
-| 16 | **create-shortcut** | skill | Create local skills as shortcuts |
-| 17 | **deep-research** | skill | 'Deep Research via Gemini |
-| 18 | **dig** | skill | Mine Claude Code sessions |
-| 19 | **dream** | skill | "Cross-repo pattern discovery |
-| 20 | **feel** | skill | "Capture how the system feels |
-| 21 | **fleet** | skill | 'Deep fleet census |
-| 22 | **forward** | skill | Create handoff + enter plan mode for next |
-| 23 | **forward-lite** | skill | Quick handoff to next session |
-| 24 | **gemini** | skill | 'Control Gemini browser tab |
-| 25 | **go** | skill | Switch skill profiles (standard/full/lab) |
-| 26 | **handover** | skill | 'Transfer work to another Oracle |
-| 27 | **harden** | skill | 'Audit Oracle configuration for safety |
-| 28 | **i-believed** | skill | "Declare belief |
-| 29 | **inbox** | skill | Read and write to Oracle inbox |
-| 30 | **incubate** | skill | Clone or create repos for active development |
-| 31 | **list-issues-pr-pulse** | skill | 'Open issues, PRs |
-| 32 | **machines** | skill | 'Fleet machines |
-| 33 | **mailbox** | skill | 'Persistent agent mailbox |
-| 34 | **mine** | skill | 'Extract a specific topic from a single |
-| 35 | **morpheus** | skill | 'Speculative dreaming |
-| 36 | **new-issue** | skill | 'Quick GitHub issue creation |
-| 37 | **oracle-manage** | skill | 'Skill and profile management |
-| 38 | **oracle-soul-sync-update** | skill | Sync Oracle instruments with the family |
-| 39 | **philosophy** | skill | Display Oracle philosophy |
-| 40 | **recap-lite** | skill | Quick session orientation |
-| 41 | **release** | skill | 'Automated release flow |
-| 42 | **resonance** | skill | Capture a resonance moment |
-| 43 | **retrospective** | skill | Quick session retrospective |
-| 44 | **rrr-lite** | skill | Quick session retrospective |
-| 45 | **skills-list** | skill | 'List all Oracle skills |
-| 46 | **speak** | skill | 'Text-to-speech using edge-tts neural voices |
-| 47 | **standup** | skill | Daily standup check |
-| 48 | **talk-to** | skill | Talk to another Oracle agent |
-| 49 | **team-agents** | skill | Spin up coordinated agent teams for any task |
-| 50 | **trace** | skill | Find projects, code |
-| 51 | **vault** | skill | Connect external knowledge bases (Obsidian |
-| 52 | **warp** | skill | 'Teleport to a remote oracle node |
-| 53 | **watch** | skill | 'Extract YouTube video transcripts |
-| 54 | **what-we-done** | skill | 'Facts-only progress report |
-| 55 | **whats-next** | skill | 'Smart action suggestions |
-| 56 | **where-we-are** | skill | Session awareness |
-| 57 | **who-are-you** | skill | Know ourselves |
-| 58 | **work-with** | skill | 'Persistent cross-oracle collaboration |
-| 59 | **workon** | skill | 'Work on a GitHub issue |
-| 60 | **worktree** | skill | 'Work in an isolated git worktree |
-| 61 | **wormhole** | skill | 'Federated query proxy |
-| 62 | **xray** | skill | X-ray deep scan |
+| 8 | **awaken** | skill | "Guided Oracle birth and awakening ritual |
+| 9 | **bampenpien** | skill | "บำเพ็ญเพียร |
+| 10 | **bud** | skill | 'Create a new oracle via maw bud |
+| 11 | **calver** | skill | Show or bump CalVer version |
+| 12 | **contacts** | skill | Manage Oracle contacts |
+| 13 | **create-shortcut** | skill | Create local skills as shortcuts |
+| 14 | **dig** | skill | Mine Claude Code sessions |
+| 15 | **dream** | skill | 'Speculative dreaming |
+| 16 | **feel** | skill | "Capture how the system feels |
+| 17 | **forward** | skill | Create handoff + enter plan mode for next |
+| 18 | **forward-lite** | skill | Quick handoff to next session |
+| 19 | **fyi** | skill | Log information for future reference |
+| 20 | **go** | skill | Manage Oracle skills |
+| 21 | **hey** | skill | Talk to another oracle via maw federation |
+| 22 | **inbox** | skill | Read and write to Oracle inbox |
+| 23 | **incubate** | skill | Clone or create repos for active development |
+| 24 | **mailbox** | skill | 'Persistent agent mailbox |
+| 25 | **recap-lite** | skill | Quick session orientation |
+| 26 | **resonance** | skill | Capture a resonance moment |
+| 27 | **rrr-lite** | skill | Quick session retrospective |
+| 28 | **standup** | skill | Daily standup check |
+| 29 | **talk-to** | skill | Talk to another Oracle agent |
+| 30 | **team-agents** | skill | Spin up coordinated agent teams for any task |
+| 31 | **trace** | skill | Find projects, code |
+| 32 | **watch** | skill | 'Extract YouTube video transcripts |
+| 33 | **where-we-are** | skill | Session awareness |
+| 34 | **who-are-you** | skill | Know ourselves |
+| 35 | **worktree** | skill | 'Work in an isolated git worktree |
+| 36 | **xray** | skill | X-ray deep scan |
+
+</details>
 
 <!-- skills:end -->
 
@@ -108,10 +117,10 @@ npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y --agent claude-code code
 
 | Profile | Count | Skills |
 |---------|-------|--------|
-| **minimal** | 7 | `about-oracle`, `forward-lite`, `go`, `oracle-soul-sync-update`, `recap-lite`, `rrr-lite`, `trace` |
-| **standard** | 13 | `awaken`, `bampenpien`, `bud`, `dig`, `forward`, `go`, `learn`, `recap`, `rrr`, `talk-to`, `team-agents`, `trace`, `xray` |
-| **full** | 62 | all |
-| **lab** | 62 | all |
+| **minimal** | 6 | `about-oracle`, `forward-lite`, `go`, `recap-lite`, `rrr-lite`, `trace` |
+| **standard** | 12 | `awaken`, `bampenpien`, `bud`, `dig`, `forward`, `go`, `learn`, `recap`, `rrr`, `talk-to`, `team-agents`, `trace` |
+| **full** | 36 | all |
+| **lab** | 36 | all |
 
 Switch anytime: `/go standard`, `/go full`, `/go lab`
 
@@ -129,24 +138,47 @@ agents                  # list 18 supported agents
 about                   # version + status
 ```
 
-## Secret Skills
+<!-- secret-skills:start -->
 
-Secret skills are excluded from all profiles. Install by name:
+## Zombie Skills
+
+28 skills excluded from all profiles. Install by name:
 
 ```bash
-npx arra-oracle-skills@26.5.13-alpha.1200 install -g -y -s watch harden wormhole fleet release warp morpheus mailbox
+npx arra-oracle-skills install -g -y -s <name>
 ```
 
 | Skill | What |
 |-------|------|
-| `/watch` | YouTube CC extraction via yt-dlp |
-| `/harden` | Oracle governance audit |
-| `/wormhole` | Federated query proxy (data sovereign) |
-| `/fleet` | Deep fleet census across nodes |
-| `/release` | Automated release flow |
-| `/warp` | SSH+tmux teleport to remote nodes |
-| `/morpheus` | Speculative dreaming (evolved /dream) |
-| `/mailbox` | Persistent agent memory in ψ/ |
+| `/alpha-feature` | Full skill development pipeline — create, compile, test, ... |
+| `/birth` | Prepare Oracle birth props for a new repo — Issue #1, MCP... |
+| `/deep-research` | Deep Research via Gemini — opens new tab, selects Deep Re... |
+| `/gemini` | Control Gemini browser tab via MQTT WebSocket — chat, tra... |
+| `/handover` | Transfer work to another Oracle — forward + wake + tell i... |
+| `/list-issues-pr-pulse` | Open issues, PRs, and Pulse board in one view. Use when u... |
+| `/mine` | Extract a specific topic from a single session JSONL file... |
+| `/new-issue` | Quick GitHub issue creation. Use when user says "new issu... |
+| `/oracle-manage` | Skill and profile management — prepare tools, switch prof... |
+| `/speak` | Text-to-speech using edge-tts neural voices with macOS sa... |
+| `/what-we-done` | Facts-only progress report — commits, PRs merged, issues ... |
+| `/whats-next` | Smart action suggestions — scan context, rank priorities,... |
+| `/workon` | Work on a GitHub issue with worktree isolation, or resume... |
+| `/i-believed` | Declare belief — looking back or leaping forward. 'I beli... |
+| `/work-with` | Persistent cross-oracle collaboration with synchronic sco... |
+| `/morpheus` | Speculative dreaming — background thinking, pre-computati... |
+| `/retrospective` | Quick session retrospective — summary, lessons, next step... |
+| `/skills-list` | List all Oracle skills with profile tier, type, and scrip... |
+| `/fleet` | Deep fleet census — discover all oracles across all nodes... |
+| `/machines` | Fleet machines — discover nodes from contacts, ping to pr... |
+| `/warp` | Teleport to a remote oracle node via SSH+tmux. Interactiv... |
+| `/release` | Automated release flow — bump version, changelog, tag, pu... |
+| `/philosophy` | Display Oracle philosophy — the 5 Principles + Rule 6. Us... |
+| `/wormhole` | Federated query proxy — ask questions across oracle nodes... |
+| `/harden` | Audit Oracle configuration for safety, governance, and ha... |
+| `/vault` | Connect external knowledge bases (Obsidian, Logseq, markd... |
+| `/dream-original` | Cross-repo pattern discovery with parallel agents. Finds ... |
+| `/oracle-soul-sync-update` | Sync Oracle instruments with the family. Check and update... |
+<!-- secret-skills:end -->
 
 ## Team Agent Scripts
 

@@ -9,6 +9,15 @@ src/cli/generated/
 ψ
 ψ/
 
+# Exception: test fixtures use a literal ψ/ tree that must be committed
+!__tests__/rrr-evals/fixtures/ψ
+!__tests__/rrr-evals/fixtures/ψ/**
+!__tests__/learn-evals/fixtures/ψ
+!__tests__/learn-evals/fixtures/ψ/**
+
+# But not the audit-loop's transient json-report
+__tests__/learn-evals/fixtures/ψ/.pytest-report.json
+
 # Claude-mem generated
 **/CLAUDE.md
 
@@ -25,3 +34,6 @@ phukhao-oracle/
 .claude/skills/
 .claude/settings.local.json
 src/commands/
+
+# build artifact
+var/
